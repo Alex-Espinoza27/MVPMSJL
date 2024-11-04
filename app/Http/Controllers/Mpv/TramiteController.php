@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Mpv;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Mpv\Modals\TipoDocumento;
 use App\Http\Controllers\Sgd\Models\Tupa;
 use Illuminate\Http\Request;
 
@@ -45,7 +46,16 @@ class TramiteController extends Controller
         return view('index',$page_data);
     }
     public function tupa(){
-        dd('entro');
-        dd(Tupa::all());
+        // dd('entro');
+        // dd(Tupa::all());
+
+        $tupa = Tupa::all(); 
+        return response()->json($tupa);
+    }
+    
+    public function tipoDocumento(){
+        $tipoDocumento = TipoDocumento::all();
+        dd($tipoDocumento);
+        return response()->json($tipoDocumento);
     }
 } 

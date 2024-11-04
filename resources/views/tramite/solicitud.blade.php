@@ -12,11 +12,11 @@
                                 <h5><a href="#">Solicitud /</a></h5>
                                 <h5><a href="#">Lista</a></h5>
                             </div>
-                        </div><!--end col-->
-                    </div><!--end row-->
-                </div><!--end page-title-box-->
-            </div><!--end col-->
-        </div><!--end row-->
+                        </div> 
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="card">
             <div class="card-header mb-2">
@@ -75,7 +75,7 @@
                     <button type="button" class="btn btn-danger">BUSCAR</button>
                     <button type="button" class="btn btn-secondary">LIMPIAR</button>
                     <button type="button" class="btn btn-info" data-bs-toggle="modal"
-                        data-bs-target="#registrarNuevo" onclick="registrarModal()">REGISTRAR NUEVO</button>
+                        data-bs-target="#registrarNuevo" onclick="abrirModal()">REGISTRAR NUEVO</button>
                 </div>
             </div>
             <div class="card-body text-size-20">
@@ -214,7 +214,7 @@
 
 {{-- MODAL DE REGISTRO --}}
 <div class="modal fade" id="registrarNuevo" tabindex="-1" role="dialog" aria-labelledby="registrarNuevo"
-    aria-hidden="false">
+    aria-hidden="false"  data-bs-backdrop="static">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header ">
@@ -225,16 +225,13 @@
                 <div class="modal-body">
                     <div class="row pb-3">
                         <div class="col-md-12">
-                            <label>Seleccione TUPA</label>
-                            <select class="select2 form-control mb-3 custom-select" style="width: 100%; height:36px;">
-                                <option value="STP" selected>SIN TUPA</option>
-                                <option value="CA">California</option>
-                                <option value="NV">Nevada</option>
-                                <option value="OR">Oregon</option>
-                                <option value="WA">Washington</option>
+                            <label>Seleccione el tipo de servicio</label>
+                            <span class="text-muted pb-3">(Opcional) </span>
+                            <select class="select2 form-control mb-3 custom-select"  onchange="getTupaSelect(event,)"
+                                style="width: 100%; height:36px;" id="P_TUPA">
+                                <option value="3" dataAdicional="20" >SOLICITUD</option>
                             </select>
                         </div>
-
                     </div>
                     {{-- CARDS DE INFROMACION DEL TUPA --}}
                     <div class="row">
@@ -257,8 +254,8 @@
                                         <h6 class="card-title text-white">Duracicón del Trámite</h6>
                                     </div>
                                     <div class="card-body card-pa">
-                                        <p class="card-text text-muted">El tramite elegi tiene una
-                                            duración de <strong>100 dias</strong>
+                                        <p class="card-text text-muted">El tramite elegido tiene un
+                                            plazo de <strong id="plazo">N/A</strong>
                                         </p>
                                     </div>
                                 </div>
@@ -273,8 +270,7 @@
                                 Documento</label>
                             <div class="form-group d-flex justify-content-center aling-item-center">
                                 <select name="P_TIPO_DOCUMENTO " class="form-select" id="P_TIPO_DOCUMENTO" required>
-                                    <option value="2024">MEMO</option>
-                                    <option value="2023">INFORME</option>
+                                    
                                 </select>
                                 <div class="justify-content-center aling-item-center">
                                     <i data-feather="minus"></i>
@@ -285,7 +281,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="P_NRO_EXPEDIENTE">Ingrese el Expediente
-                                referencial(Opcioal) </label>
+                                referencial (Opcioal) </label>
                             <div class="form-group d-flex justify-content-center aling-item-center">
                                 <input type="text" class="form-control border" name="P_NRO_EXPEDIENTE"
                                     id="P_NRO_EXPEDIENTE" placeholder="Numero del expediente" required>
@@ -349,8 +345,7 @@
                                                     </div>
                                                     <div
                                                         class="col-md-4 d-flex justify-content-center aling-item-center">
-                                                        <span data-repeater-create="" id="AGREGAR_ANEXO" onclick="addAnexo()"
-                                                            class="btn btn-outline-success pt-2">
+                                                        <span data-repeater-create="" id="AGREGAR_ANEXO"  class="btn btn-outline-success pt-2">
                                                             <span class="fas fa-plus"></span> Agregar
                                                             anexo
                                                         </span>

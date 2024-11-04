@@ -8,7 +8,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
         <title>{{ $page_title }}</title>
         <meta content="" name="description" />
-        <link rel="shortcut icon" href="{{ asset('assets/images/logo-64x64.ico') }}">
+        <link rel="shortcut icon" href="{{ asset('assets/images/logo.png') }}">
         <meta name="csrf-token" content="{{ csrf_token() }}" />
         @include('topcss')
 

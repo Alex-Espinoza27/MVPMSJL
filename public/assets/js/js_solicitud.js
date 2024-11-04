@@ -1,58 +1,81 @@
-$(".select2").select2({
-    width: "100%",
-    dropdownParent: $("#registrarNuevo")
-});
+// $(".select2").select2({
+//     width: "100%",
+//     dropdownParent: $("#registrarNuevo")
+// });
 
 $(document).ready(function () {
-    $('.repeater-default').repeater({
-        showFirstItem: false, // No muestra el primer item por defecto
-        initEmpty: true, // Inicia sin items visibles
-        defaultValues: {
-            'text-input': ''
-        },
-        show: function () {
-            $(this).slideDown(); // Anima la aparición de nuevos items
-        },
-        hide: function (deleteElement) {
-            $(this).slideUp(deleteElement);
-        }
-    });
+//     $('.repeater-default').repeater({
+//         showFirstItem: false, 
+//         initEmpty: true, 
+//         defaultValues: {
+//             'text-input': ''
+//         },
+//         show: function () {
+//             $(this).slideDown(); 
+//         },
+//         hide: function (deleteElement) {
+//             $(this).slideUp(deleteElement);
+//         }
+//     }); 
+    getTupa();
 });
 
 
-function registrarModal(){
-    // var nombre = document.getElementById("nombre").value;
-    // llenar TUPA
-    let url = 'tramite/solicitud/tupa';
-    fetchGet(url, function (result) {
-        console.log(result);
-        
-        // llenarCombo();
+function abrirModal() {
+    $(".select2").select2({
+        width: "100%",
+        dropdownParent: $("#registrarNuevo")
     });
 
-    // llenarCombo();
+    $(document).ready(function () {
+        $('.repeater-default').repeater({
+            showFirstItem: false,
+            initEmpty: true,
+            defaultValues: {
+                'text-input': ''
+            },
+            show: function () {
+                $(this).slideDown();
+            },
+            hide: function (deleteElement) {
+                $(this).slideUp(deleteElement);
+            }
+        });
+        // getTupa();
+    });
 
+    // mostrar TUPA
+    getTipoDocumento();
 }
 
-function addAnexo() {
-    // const anexos = document.querySelectorAll('input[id="P_ANEXOS[]"]');
-    // const archivos = [];
-    // var totalMB = 0;
-    // var maxSizeTotal = (100) * 1024 * 1024; 
-    // anexos.forEach(input => {
-    //     if (input.files.length > 0) {
-    //         archivos.push(...input.files);
-    //         totalMB += input.files[0].size / (1024 * 1024);
-    //     }
-    //     console.log("total de MB:", totalMB);
-    // });
-    // console.log("archivos:", archivos);
-    // if (totalMB > maxSizeTotal) {
-    //     showMessageSweet('error', 'Opss!', 'Solamente se permiten 100MB en total de anexos.');
-    //     return false;
-    // }
-
+function registrarSolicitud() {
 }
+
+function getTupa() {
+    let url = 'tramite/solicitud/tupa';
+    fetchGet(url, function (result) {
+        llenarCombo(result, 'P_TUPA', 'DE_NOMBRE', 'CO_PROCESO', 0, '', 'NU_PLAZO');
+    });
+}
+
+function getTupaSelect(event) {
+    const select = event.target; 
+    // Obtén la opción seleccionada
+    var selectedOption = select.options[select.selectedIndex];
+    // Obtén el valor del atributo dataAdicional
+    console.log(selectedOption);
+    var dataAdicional = selectedOption.getAttribute("dataAdicional");
+    const plazoElement = document.getElementById('plazo');
+    plazoElement.textContent = dataAdicional || 'N/A';
+}
+
+function getTipoDocumento() {
+    let url = 'tramite/solicitud/tipoDocumento';
+    fetchGet(url, function (result) {
+        llenarCombo(result, 'P_TIPO_DOCUMENTO', 'TIPDOC_DESCRIPCION ', 'TIPDOC_ID');
+    });
+}
+
 
 function longitudTextAsunto(inputID, IDmessage) {
     const mensaje = document.querySelector('#' + inputID);
@@ -147,3 +170,5 @@ function uploadAnexoFail(event, cant = 2) {
     // $(document).on("click", "#AGREGAR_ANEXO", function() {
     // });  
 }
+
+

@@ -26,15 +26,13 @@ Route::get('/registrar', [SeguridadController::class, 'registrar'])->name('segur
 Route::get('/usuario', [SeguridadController::class, 'usuario']);
 
 
-Route::get('/provincias/{departamento}', [UbigeoController::class,'provincias'])->name('getProvincias');
+Route::get('/provincias/{departamento}', [UbigeoController::class,'provincias'])->name('departamento.provincias');
 Route::get('/distritos/{departamento}/{provincia}', action: [UbigeoController::class,'distritos'])->name('getDistritos');
 
 Route::post('iniciar-sesion', [UsuarioController::class, 'login'])->name('login.submit');
 
 Route::middleware(['session.check'])->group(function () {
     Route::get('/dashboard', [MainController::class, 'dashboard'])->name('dashboard');
-
-    
 
     Route::prefix('usuario')->group(function () {
         // perfil / modificar
@@ -43,8 +41,7 @@ Route::middleware(['session.check'])->group(function () {
     Route::prefix('tramite')->group(function () {
         Route::get('/solicitud', [TramiteController::class, 'solicitud'])->name('solicitud');
         Route::get('/solicitud/tupa', [TramiteController::class, 'tupa'])->name('solicitud.tupa');
-
+        Route::get('/solicitud/tipoDocumento', [TramiteController::class, 'tipoDocumento'])->name('solicitud.tipoDocumento');
     });
-
 
 });

@@ -205,8 +205,7 @@ function fetchGet(url, callback, loading = true) {
     if (loading) {
         $("body").addClass("loader");
     }
-
-    var urlAbsoluta = urljs + url;
+    var urlAbsoluta = urljs + url; 
     fetch(urlAbsoluta).then(res => res.json())
         .then(res => {
             $("body").removeClass("loader");
@@ -215,7 +214,7 @@ function fetchGet(url, callback, loading = true) {
         }).catch(err => {
             $("body").removeClass("loader");
             console.log(err);
-        })
+        }) 
 }
 
 function fetchGetHtml(url, callback) {
@@ -229,21 +228,32 @@ function fetchGetHtml(url, callback) {
         });
 }
 
-function llenarCombo(data, id, propiedadMostrar, propiedadId, valueDefecto = "", valueSelected = "") {
+function llenarCombo(data, id, propiedadMostrar, propiedadId, valueDefecto = "", valueSelected = "", valueAdicional= "") {
     var contenido = ""
     var elemento;
+    var AtributoAdicional = ""
     contenido += "<option value='" + valueDefecto + "'>-- Seleccione --</option>"
+
+    // adicional = (valueAdicional != "")? "dataAdicional='"+valueAdicional+"'": "";
+    // console.log(AtributoAdicional); 
+    // console.log(valueAdicional); 
+    
     for (var j = 0; j < data.length; j++) {
         elemento = data[j];
+
+        if(valueAdicional != ""){
+            AtributoAdicional = "dataAdicional='"+elemento[valueAdicional]+"'";
+        }
+
         if (elemento[propiedadId] == valueSelected) {
-            contenido += "<option value='" + elemento[propiedadId] + "' selected>" + elemento[propiedadMostrar] + "</option>"
+            contenido += "<option value='" + elemento[propiedadId] + "' "+ AtributoAdicional +" selected>" + elemento[propiedadMostrar] + "</option>"
         } else {
-            contenido += "<option value='" + elemento[propiedadId] + "' >" + elemento[propiedadMostrar] + "</option>"
+            contenido += "<option value='" + elemento[propiedadId] + "' "+ AtributoAdicional +" >" + elemento[propiedadMostrar] + "</option>"
         }
     }
     contenido += "";
     document.getElementById(id).innerHTML = contenido;
-}
+}   
 
 function buscarEnTabla(idInput, IdTabla) {
     $(idInput).keyup(function () {
