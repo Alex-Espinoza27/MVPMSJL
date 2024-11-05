@@ -3,13 +3,19 @@
 namespace App\Http\Controllers\Mpv;
 
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Mpv\Modals\TipoDocumento;
+use App\Http\Controllers\Mpv\Models\TipoDocumento;
 use App\Http\Controllers\Sgd\Models\Tupa;
 use Illuminate\Http\Request;
 
 class TramiteController extends Controller
 {
-    public function solicitud(){
+    // public function __construct()
+    // {
+    //     $tipoDocumento = TipoDocumento::all(); 
+    // }
+
+    public function solicitud()
+    {
         // dd("entro");
         $page_data['header_js'] = array(
             // select2 
@@ -18,15 +24,19 @@ class TramiteController extends Controller
             'plugins/datatables/jquery.dataTables.min.js',
             'plugins/datatables/dataTables.bootstrap5.min.js',
             'pages/jquery.datatable.init.js',
-
+            // cargar archivos
+            'plugins/dropify/js/dropify.min.js',
+            'pages/jquery.form-upload.init.js',
+            // form validation 
+            'pages/jquery.validation.init.js',
+            'plugins/parsleyjs/parsley.min.js',
+            //tablas
             'plugins/datatables/dataTables.buttons.min.js',
             'plugins/datatables/buttons.bootstrap5.min.js',
             // repetir anexos
             'plugins/repeater/jquery.repeater.min.js',
-            'pages/jquery.form-repeater.js',
-            // cargar archivos
-            'plugins/dropify/js/dropify.min.js',
-            'pages/jquery.form-upload.init.js'
+            'pages/jquery.form-repeater.js'
+
         );
         $page_data['header_css'] = array(
             // select2 - table
@@ -43,19 +53,20 @@ class TramiteController extends Controller
         $page_data['page_title'] = 'Mis Tramites';
         $page_data['breadcrumb'] = 'solicitud';
 
-        return view('index',$page_data);
+        return view('index', $page_data);
     }
-    public function tupa(){
-        // dd('entro');
-        // dd(Tupa::all());
-
-        $tupa = Tupa::all(); 
+    public function tupa()
+    {
+        $tupa = Tupa::all();
         return response()->json($tupa);
     }
-    
-    public function tipoDocumento(){
+
+    public function tipoDocumento()
+    {
         $tipoDocumento = TipoDocumento::all();
-        dd($tipoDocumento);
         return response()->json($tipoDocumento);
     }
-} 
+    public function registrarSolicitud(Request $request){
+        dd($request);
+    }
+}

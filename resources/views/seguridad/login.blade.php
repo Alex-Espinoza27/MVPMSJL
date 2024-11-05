@@ -13,7 +13,7 @@
     <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
 
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="container">
@@ -164,12 +164,15 @@
             </div>
         </div>
     </div>
+
     <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('assets/js/waves.js') }}"></script>
     <script src="{{ asset('assets/js/feather.min.js') }}"></script>
     <script src="{{ asset('assets/js/simplebar.min.js') }}"></script>
     <script src="{{ asset('assets/js/js_general.js') }}"></script>
+    <script src="{{asset('assets/pages/jquery.validation.init.js')}}"></script>
+    <script src="{{asset('assets/plugins/parsleyjs/parsley.min.js')}}"></script>
     <script>
         document.getElementById("P_TIPO_PERSONA").addEventListener("change", function() {
             var grupo_ruc = document.getElementById("GROUP-RUC");

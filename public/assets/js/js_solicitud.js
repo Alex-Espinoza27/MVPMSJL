@@ -1,23 +1,21 @@
-// $(".select2").select2({
-//     width: "100%",
-//     dropdownParent: $("#registrarNuevo")
-// });
 
+// no se puede poner dentro del  abrimodal porque se repite dos veces el anexo
 $(document).ready(function () {
-//     $('.repeater-default').repeater({
-//         showFirstItem: false, 
-//         initEmpty: true, 
-//         defaultValues: {
-//             'text-input': ''
-//         },
-//         show: function () {
-//             $(this).slideDown(); 
-//         },
-//         hide: function (deleteElement) {
-//             $(this).slideUp(deleteElement);
-//         }
-//     }); 
+    $('.repeater-default').repeater({
+        showFirstItem: false,
+        initEmpty: true,
+        defaultValues: {
+            'text-input': ''
+        },
+        show: function () {
+            $(this).slideDown();
+        },
+        hide: function (deleteElement) {
+            $(this).slideUp(deleteElement);
+        }
+    });
     getTupa();
+
 });
 
 
@@ -26,28 +24,56 @@ function abrirModal() {
         width: "100%",
         dropdownParent: $("#registrarNuevo")
     });
-
-    $(document).ready(function () {
-        $('.repeater-default').repeater({
-            showFirstItem: false,
-            initEmpty: true,
-            defaultValues: {
-                'text-input': ''
-            },
-            show: function () {
-                $(this).slideDown();
-            },
-            hide: function (deleteElement) {
-                $(this).slideUp(deleteElement);
-            }
-        });
-        // getTupa();
-    });
-
-    // mostrar TUPA
+    limpiarModal();
     getTipoDocumento();
 }
 
+
+function limpiarModal() {
+    console.log("entreo");
+
+    // Restablecer el estado de validación de Parsley
+    $('.form-parsley').parsley().reset();
+
+    // Limpiar todos los campos de texto y textarea
+    $('#P_NRO_DOCUMENTO').val('');
+    $('#P_NRO_EXPEDIENTE').val('');
+    $('#P_TIPO_DOCUMENTO').val('').trigger('change');  // Para limpiar y restablecer el select2 si usas select2
+    $('#P_ANIO_EXPEDIENTE').val('2024').trigger('change'); // Restablecer el valor por defecto
+
+    //  Todo anexos
+    $('#P_ASUNTO').val('');
+
+    var textoMaximo = document.getElementById('textoMaximo').value = '';
+    textoMaximo.value = ""
+    //  $('#textoMaximo').val('');
+    console.log(textoMaximo.value);
+
+    $("#P_ASUNTO").removeClass('invalid-feedback')
+    $("#P_ASUNTO").removeClass('is-invalid');
+    $("#textoMaximo").removeClass('invalid-feedback');
+    $("#textoMaximo").removeClass('valid-feedback');
+
+    document.getElementById('P_ARCHIVO_PRIN').value = null;
+    $('#P_ARCHIVO_PRIN').val('');
+    $('.dropify').dropify('destroy');
+    $('#P_ARCHIVO_PRIN').dropify();
+    console.log(document.getElementById('P_ARCHIVO_PRIN').value);
+
+    // Limpiar los anexos generados por el repeater
+    $('input[id^="P_ANEXOS[]"]').each(function () {
+        $(this).val('').dropify('reset');  // Limpiar el input de archivo de Dropify
+    });
+
+    // Eliminar los anexos del repeater
+    $('div[data-repeater-item]').each(function () {
+        $(this).remove();  // Elimina los elementos del repeater
+    });
+
+    //  // Restablecer al valor por defecto
+    $('#P_TUPA').val('0').trigger('change');
+
+}
 function registrarSolicitud() {
 }
 
@@ -59,11 +85,11 @@ function getTupa() {
 }
 
 function getTupaSelect(event) {
-    const select = event.target; 
+    const select = event.target;
     // Obtén la opción seleccionada
     var selectedOption = select.options[select.selectedIndex];
     // Obtén el valor del atributo dataAdicional
-    console.log(selectedOption);
+    // console.log(selectedOption);
     var dataAdicional = selectedOption.getAttribute("dataAdicional");
     const plazoElement = document.getElementById('plazo');
     plazoElement.textContent = dataAdicional || 'N/A';
@@ -72,10 +98,9 @@ function getTupaSelect(event) {
 function getTipoDocumento() {
     let url = 'tramite/solicitud/tipoDocumento';
     fetchGet(url, function (result) {
-        llenarCombo(result, 'P_TIPO_DOCUMENTO', 'TIPDOC_DESCRIPCION ', 'TIPDOC_ID');
+        llenarCombo(result, 'P_TIPO_DOCUMENTO', 'TIPDOC_DESCRIPCION', 'TIPDOC_ID', '', '', '');
     });
 }
-
 
 function longitudTextAsunto(inputID, IDmessage) {
     const mensaje = document.querySelector('#' + inputID);
@@ -119,27 +144,33 @@ function uploadMainFail(event, cant = 2) {
         }
     }
 }
-function uploadAnexoFail(event, cant = 2) {
+
+function uploadAnexo(event, cant = 2) {
     const file = event.target.files[0];
     const anexos = document.querySelectorAll('input[id="P_ANEXOS[]"]');
     const archivos = [];
-    var maxSizeTotal = (100) * 1024 * 1024;
+    var maxSizeTotal = (2) //* 1024 * 1024;
     var totalMB = 0;
 
     console.log("entro");
+
     if (file) {
         const fileSize = file.size;
         const maxSize = cant * 1024 * 1024;
         console.log("entro al if: ", fileSize);
+        // Habilitarlo el span de agregar anexo
+        // document.getElementById('AGREGAR_ANEXO').style.pointerEvents = 'auto';
+        // document.getElementById('AGREGAR_ANEXO').style.opacity = '1';
+
         // Array de tipos de archivos permitidos
-        const allowedTypes = [
+        const TiposPermitidos = [
             'application/pdf',
             'application/docx',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // Para .docx
-            'image/jpeg', // Para JPG
-            'image/png' // Para PNG
+            'image/jpeg',
+            'image/png'
         ];
-        if (!allowedTypes.includes(file.type)) {
+        if (!TiposPermitidos.includes(file.type)) {
             showMessageSweet('error', 'Opss!', 'Solo están permitidos archivos PDF, DOCX, JPG, PNG');
             console.log("file:type: ", file.type);
             event.target.value = null;
@@ -161,8 +192,10 @@ function uploadAnexoFail(event, cant = 2) {
         });
         console.log("total MB:", totalMB);
         if (totalMB > maxSizeTotal) {
-            showMessageSweet('error', 'Opss!', 'Solamente se permiten 100 MB en total de anexos.');
+            showMessageSweet('error', 'Opss!', `Solamente se permiten ${maxSizeTotal} MB en total de anexos.`);
             event.target.value = null;
+            // document.getElementById('AGREGAR_ANEXO').style.pointerEvents = 'none';
+            // document.getElementById('AGREGAR_ANEXO').style.opacity = '0.6';
             return false;
         }
     }
@@ -171,4 +204,51 @@ function uploadAnexoFail(event, cant = 2) {
     // });  
 }
 
+function registerSoli() {
+    // Crear un objeto FormData para enviar los datos del formulario
+    let formData = new FormData();
+
+    // Obtener valores de los campos de texto y selects
+    formData.append('P_TUPA', document.getElementById('P_TUPA').value);
+    formData.append('plazo', document.getElementById('plazo').innerText);  // Si 'plazo' es un <strong> dentro de una etiqueta
+    formData.append('P_ASUNTO', document.getElementById('P_ASUNTO').value);
+    formData.append('P_TIPO_DOCUMENTO', document.getElementById('P_TIPO_DOCUMENTO').value);
+    formData.append('P_NRO_EXPEDIENTE', document.getElementById('P_NRO_EXPEDIENTE').value);
+    formData.append('P_ANIO_EXPEDIENTE', document.getElementById('P_ANIO_EXPEDIENTE').value);
+
+    // Obtener el archivo principal
+    const archivoPrincipal = document.getElementById('P_ARCHIVO_PRIN').files[0];
+    if (archivoPrincipal) {
+        formData.append('P_ARCHIVO_PRIN', archivoPrincipal);
+    }
+
+    // Obtener los anexos
+    const anexos = document.querySelectorAll('input[id^="P_ANEXOS[]"]');
+    anexos.forEach((input, index) => {
+        const archivoAnexo = input.files[0];
+        if (archivoAnexo) {
+            formData.append(`P_ANEXOS[${index}]`, archivoAnexo);  // Enviar anexos con nombre de campo P_ANEXOS[n]
+        }
+    });
+
+    console.log(formData);
+    
+    // Enviar el formulario a la ruta '/solicitud/registrar' con método POST
+    // fetch('/solicitud/registrar', {
+    //     method: 'POST',
+    //     body: formData,
+    //     headers: {
+    //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')  // Para enviar el token CSRF
+    //     }
+    // })
+    //     .then(response => response.json())  // Aquí puedes manejar la respuesta, por ejemplo si es exitosa o si hay errores
+    //     .then(data => {
+    //         console.log(data);  // Aquí puedes manejar la respuesta de la API (como éxito o error)
+    //         alert('Solicitud registrada con éxito');
+    //     })
+    //     .catch(error => {
+    //         console.error('Error al registrar la solicitud:', error);
+    //         alert('Ocurrió un error al registrar la solicitud.');
+    //     });
+}
 

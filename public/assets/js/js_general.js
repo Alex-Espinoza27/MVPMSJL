@@ -234,13 +234,8 @@ function llenarCombo(data, id, propiedadMostrar, propiedadId, valueDefecto = "",
     var AtributoAdicional = ""
     contenido += "<option value='" + valueDefecto + "'>-- Seleccione --</option>"
 
-    // adicional = (valueAdicional != "")? "dataAdicional='"+valueAdicional+"'": "";
-    // console.log(AtributoAdicional); 
-    // console.log(valueAdicional); 
-    
     for (var j = 0; j < data.length; j++) {
         elemento = data[j];
-
         if(valueAdicional != ""){
             AtributoAdicional = "dataAdicional='"+elemento[valueAdicional]+"'";
         }
@@ -251,6 +246,8 @@ function llenarCombo(data, id, propiedadMostrar, propiedadId, valueDefecto = "",
             contenido += "<option value='" + elemento[propiedadId] + "' "+ AtributoAdicional +" >" + elemento[propiedadMostrar] + "</option>"
         }
     }
+
+    
     contenido += "";
     document.getElementById(id).innerHTML = contenido;
 }   
@@ -331,33 +328,33 @@ function FormatNumber(n, currency = '') {
     return currency + parseFloat(n).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,');
 }
 
-function showPopup(ruta, idmodal, className = "", titulo = "Popup") {
+// function showPopup(ruta, idmodal, className = "", titulo = "Popup") {
 
-    var namePopup = 'popup_' + idmodal;
-    var contenido = "";
-    contenido += `<div class="modal fade modal-class" id="${namePopup}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                       <div class="modal-dialog modal-dialog-centered ${className} " role="document">
-                           <div class="modal-content">
-                               <div class="modal-header bg-muni">
-                                   <h6 class="modal-title m-0 text-white" id="exampleModalPrimary1">${titulo}</h6>
-                                   <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                               </div>
-                               <div class="modal-body ${namePopup}">
-                               </div>
-                               <div class="modal-footer">                                                    
-                                   <button type="button" class="btn btn-soft-secondary " data-bs-dismiss="modal">Cerrar ventana</button>
-                               </div>
-                           </div>
-                       </div>
-                   </div>`;
-    removeElementsByClass('modal-class');
+//     var namePopup = 'popup_' + idmodal;
+//     var contenido = "";
+//     contenido += `<div class="modal fade modal-class" id="${namePopup}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+//                        <div class="modal-dialog modal-dialog-centered ${className} " role="document">
+//                            <div class="modal-content">
+//                                <div class="modal-header bg-muni">
+//                                    <h6 class="modal-title m-0 text-white" id="exampleModalPrimary1">${titulo}</h6>
+//                                    <button type="button" class="btn-close bg-white" data-bs-dismiss="modal" aria-label="Close"></button>
+//                                </div>
+//                                <div class="modal-body ${namePopup}">
+//                                </div>
+//                                <div class="modal-footer">                                                    
+//                                    <button type="button" class="btn btn-soft-secondary " data-bs-dismiss="modal">Cerrar ventana</button>
+//                                </div>
+//                            </div>
+//                        </div>
+//                    </div>`;
+//     removeElementsByClass('modal-class');
 
-    $("body").append(contenido);
+//     $("body").append(contenido);
 
-    $('.' + namePopup).load(urljs + ruta, function (res) { });
+//     $('.' + namePopup).load(urljs + ruta, function (res) { });
 
-    OpenModal("#" + namePopup);
-}
+//     OpenModal("#" + namePopup);
+// }
 
 function removeElement(id) {
     var elem = document.getElementById(id);

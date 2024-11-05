@@ -95,7 +95,7 @@ class UsuarioController extends Controller
         // REGISTRA LA PERSONA EN LA TABLA CIUDADANO
         $this->registrarCiudadano($personaNatural);
         $personaNatural->save();
-        return redirect()->route('iniciar-sesion')->with('ok', 'Usuario registrado exitosamente.');
+        return redirect('/')->with('ok', 'Usuario registrado exitosamente.');
     }
     private function asignarAtributosRepetidos($usuario, $request)
     {

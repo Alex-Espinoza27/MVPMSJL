@@ -26,17 +26,17 @@
                     <div class="col-md-4">
                         <div class="form-group mt-2 ">
                             <div class="form-group">
-                                <label class="form-label" for="P_NRO_DOCUMENTO">Número de Solicitud / Expediente</label>
-                                <input type="text" class="form-control border border-info" name="P_NRO_DOCUMENTO"
-                                    id="P_NRO_DOCUMENTO" placeholder="Ingrese el numero del expediente">
+                                <label class="form-label" for="FILTRO_NRO_DOCUMENTO">Número de Solicitud / Expediente</label>
+                                <input type="text" class="form-control border border-info" name="FILTRO_NRO_DOCUMENTO"
+                                    id="FILTRO_NRO_DOCUMENTO" placeholder="Ingrese el numero del expediente">
                             </div>
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group mt-2 ">
                             <label class="form-label">Tipo Documento</label>
-                            <select name="P_TIPO_DOCUMENTO" class="form-select border border-info"
-                                id="P_TIPO_DOCUMENTO">
+                            <select name="FILTRO_TIPO_DOCUMENTO" class="form-select border border-info"
+                                id="FILTRO_TIPO_DOCUMENTO">
                                 <option value="1" selected="">Todos</option>
                                 <option value="2">TUPA</option>
                                 <option value="3">SOLICITUD</option>
@@ -46,7 +46,7 @@
                     <div class="col-md-2">
                         <div class="form-group mt-2 ">
                             <label class="form-label">Estado del documento</label>
-                            <select name="P_ESTADO" class="form-select border border-info" id="P_TIPO_DOCUMENTO">
+                            <select name="FILTRO_ESTADO" class="form-select border border-info" id="FILTRO_TIPO_DOCUMENTO">
                                 <option value="1" selected="">Todos</option>
                                 <option value="2">PRESENTADO</option>
                                 <option value="3">OBSERVADO</option>
@@ -56,7 +56,7 @@
                     <div class="col-md-2">
                         <div class="form-group mt-2 ">
                             <label class="form-label">Estado del documento</label>
-                            <select name="P_ESTADO" class="form-select border border-info " id="P_TIPO_DOCUMENTO">
+                            <select name="FILTRO_ESTADO" class="form-select border border-info " id="FILTRO_TIPO_DOCUMENTO">
                                 <option value="1" selected="">Todos</option>
                                 <option value="2">PRESENTADO</option>
                                 <option value="3">OBSERVADO</option>
@@ -65,9 +65,9 @@
                     </div>
                     <div class="col-md-2">
                         <div class="form-group mt-2">
-                            <label class="form-label" for="P_NRO_DOCUMENTO">Desde</label>
-                            <input type="date" class="form-control border border-info" name="P_NRO_DOCUMENTO"
-                                id="P_NRO_DOCUMENTO" placeholder="Ingrese el numero del expediente">
+                            <label class="form-label" for="FILTRO_NRO_DOCUMENTO">Desde</label>
+                            <input type="date" class="form-control border border-info" name="FILTRO_NRO_DOCUMENTO"
+                                id="FILTRO_NRO_DOCUMENTO" placeholder="Ingrese el numero del expediente">
                         </div>
                     </div>
                 </div>
@@ -221,13 +221,15 @@
                 <h6 class="modal-title m-0" id="">REGISTRAR SOLICITUD</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div><!--end modal-header-->
-            <form action="">
+            <form class="form-parsley">
+                {{-- action="{{route('tramite.solicitud.registrar')}}"  method="POST" --}}
+                @csrf
                 <div class="modal-body">
                     <div class="row pb-3">
                         <div class="col-md-12">
                             <label>Seleccione el tipo de servicio</label>
                             <span class="text-muted pb-3">(Opcional) </span>
-                            <select class="select2 form-control mb-3 custom-select"  onchange="getTupaSelect(event,)"
+                            <select class="select2 form-control mb-3 custom-select"  onchange="getTupaSelect(event,0)"
                                 style="width: 100%; height:36px;" id="P_TUPA">
                                 <option value="3" dataAdicional="20" >SOLICITUD</option>
                             </select>
@@ -255,7 +257,7 @@
                                     </div>
                                     <div class="card-body card-pa">
                                         <p class="card-text text-muted">El tramite elegido tiene un
-                                            plazo de <strong id="plazo">N/A</strong>
+                                            plazo de <strong  id="plazo"  >N/A</strong>
                                         </p>
                                     </div>
                                 </div>
@@ -266,33 +268,41 @@
                     {{-- TIPO DE DOCUMENTO - POR EL MOMENTO --}}
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label" for="P_TIPO_DOCUMENTO">Seleccione el Tipo
-                                Documento</label>
+                            <label class="form-label" for="P_TIPO_DOCUMENTO">Seleccione el Tipo de Documento</label>
                             <div class="form-group d-flex justify-content-center aling-item-center">
-                                <select name="P_TIPO_DOCUMENTO " class="form-select" id="P_TIPO_DOCUMENTO" required>
-                                    
-                                </select>
-                                <div class="justify-content-center aling-item-center">
+                                <div class="col-md-5">
+                                    <select name="P_TIPO_DOCUMENTO " class="form-select" id="P_TIPO_DOCUMENTO" required>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 d-flex justify-content-center aling-item-center">
                                     <i data-feather="minus"></i>
                                 </div>
-                                <input type="text" class="form-control border" name="P_NRO_DOCUMENTO"
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control border" name="P_NRO_DOCUMENTO"
                                     id="P_NRO_DOCUMENTO" placeholder="Numero de documento" required>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label" for="P_NRO_EXPEDIENTE">Ingrese el Expediente
                                 referencial (Opcioal) </label>
                             <div class="form-group d-flex justify-content-center aling-item-center">
-                                <input type="text" class="form-control border" name="P_NRO_EXPEDIENTE"
+                                <div class="col-md-5">
+                                    <input type="text" class="form-control border" name="P_NRO_EXPEDIENTE"
                                     id="P_NRO_EXPEDIENTE" placeholder="Numero del expediente" required>
-                                <div class="justify-content-center aling-item-center">
-                                    <i data-feather="minus"></i>
                                 </div>
-                                <select name="P_ANIO_EXPEDIENTE " class="form-select" id="P_ANIO_EXPEDIENTE"
+                                <div class="col-md-2">
+                                    <div class="justify-content-center aling-item-center">
+                                        <i data-feather="minus"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <select name="P_ANIO_EXPEDIENTE " class="form-select " id="P_ANIO_EXPEDIENTE"
                                     required>
                                     <option value="2024">2024</option>
                                     <option value="2023">2023</option>
                                 </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -301,9 +311,10 @@
                     <div class="row pb-3">
                         <div class="col-md-12">
                             <label class="mb-2">Ingrese el asunto</label>
-                            <textarea class="form-control" rows="5" id="textarea" name="textarea" placeholder="Escriba aquí.."
-                                required="" minlength="15" maxlength="200" onkeyup="longitudTextAsunto('textarea','textoMaximo');"
+                            <textarea class="form-control" rows="5" id="P_ASUNTO" name="P_ASUNTO" placeholder="Escriba aquí.."
+                                required onkeyup="longitudTextAsunto('P_ASUNTO','textoMaximo');" minlength="15" maxlength="200" 
                                 style="height: 96px;"></textarea>
+                                {{-- required="" minlength="15" maxlength="200" --}}
                             <small id="textoMaximo"></small>
                         </div>
                     </div>
@@ -319,12 +330,11 @@
                                         aceptan formato pdf</span>
                                 </div>
                                 <div class="card-body ">
-                                    <input type="file" id="P_ARCHIVO_PRIN" class="dropify rounded"
-                                        data-allowed-file-extensions="pdf" data-max-file-size-preview="50M"
-                                        data-errors-position="outside" onchange="uploadMainFail(event,5)"
-                                        required />
-                                </div>
-                                {{-- <div class="card-body"></div>  --}}
+                                    <input type="file" id="P_ARCHIVO_PRIN" name="P_ARCHIVO_PRIN" class="dropify rounded form-file"
+                                        data-allowed-file-extensions="pdf" data-max-file-size-preview="50" required
+                                        data-errors-position="outside" onchange="uploadMainFail(event,50)"
+                                         />
+                                </div> 
                             </div>
                         </div>
 
@@ -339,12 +349,11 @@
                                                     <div class="col-md-8">
                                                         <label class="card-title" for="">
                                                             Anexos (Opcional) :</label>
-                                                        <span class="text-muted pb-3">Peso máxim por
+                                                        <span class="text-muted pb-3">Peso máximo por
                                                             anexo es 20MB, el formato puede ser pdf,
                                                             word y jpg;</span>
                                                     </div>
-                                                    <div
-                                                        class="col-md-4 d-flex justify-content-center aling-item-center">
+                                                    <div class="col-md-4 d-flex justify-content-center aling-item-center">
                                                         <span data-repeater-create="" id="AGREGAR_ANEXO"  class="btn btn-outline-success pt-2">
                                                             <span class="fas fa-plus"></span> Agregar
                                                             anexo
@@ -354,22 +363,20 @@
                                             </div>
                                         </div>
                                         <div class="card-body">
-                                            <div data-repeater-list="car">
+                                            <div data-repeater-list="card">
                                                 <div data-repeater-item="">
                                                     <div class="form-group row d-flex align-items-end">
                                                         <div class="col-md-8">
                                                             <input type="file"
-                                                                class="form-control rounded dropify " id="P_ANEXOS[]"
-                                                                {{-- data-allowed-file-extensions="pdf jpg jpeg png" --}}
+                                                                class="form-control rounded "
                                                                 accept="application/pdf,image/png, image/jpeg,.doc,.docx"
-                                                                data-max-file-size="20M"
-                                                                data-errors-position="outside" onchange="uploadAnexoFail(event,20)" required>
+                                                                data-max-file-size="20"
+                                                                 name="P_ANEXOS[]" id="P_ANEXOS[]"
+                                                                data-errors-position="outside" onchange="uploadAnexo(event,20)" required>
                                                         </div>
                                                         <div class="col-md-3">
-                                                            <span data-repeater-delete=""
-                                                                class="btn btn-outline-danger">
-                                                                <span class="far fa-trash-alt me-1"></span>
-                                                                Deleteq
+                                                            <span data-repeater-delete="" class="btn btn-outline-danger">
+                                                                <span class="far fa-trash-alt me-1"></span>Eliminar
                                                             </span>
                                                         </div>
                                                     </div>
@@ -383,9 +390,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-danger"><i class="typcn typcn-tick"></i>
+                    <button type="submit" class="btn btn-danger"><i class="typcn typcn-tick" onclick="registerSoli()"></i>
                         REGISTRAR</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="limpiarModal()"><i
                             class="typcn typcn-times"></i> CANCELAR</button>
                 </div>
             </form>

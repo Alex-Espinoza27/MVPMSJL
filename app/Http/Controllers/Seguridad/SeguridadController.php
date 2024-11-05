@@ -18,5 +18,4 @@ class SeguridadController extends Controller
                         
         return view('seguridad.registrar', compact('departamentos'));
     }
-
 }

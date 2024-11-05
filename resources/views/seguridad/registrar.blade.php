@@ -81,7 +81,7 @@
                                                 });
                                             </script>
                                         @endif
-                                        <form class="form-parsley" action="./usuario.store" method="POST">
+                                        <form class="form-parsley" action="{{route('login.registrar')}}" method="POST">
                                             @csrf
 
                                             <div class="form-group mb-4 ">
@@ -303,6 +303,8 @@
 
 
     <script src="{{ asset('assets/js/jquery.min.js') }}"></script>
+    <script src="{{asset('assets/pages/jquery.validation.init.js')}}"></script>
+    <script src="{{asset('assets/plugins/parsleyjs/parsley.min.js')}}"></script>
     <script src="{{ asset('assets/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('assets/js/waves.js') }}"></script>
     <script src="{{ asset('assets/js/feather.min.js') }}"></script>
