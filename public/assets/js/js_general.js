@@ -23,6 +23,7 @@ function showMessage(tipo = '', contenido = '', titulo = '') {
     toastr.remove(toast);
 }
 
+
 function showMessageSweet(tipo = '', titulo = '', contenido = '') {
     Swal.fire({
         title: titulo,
@@ -246,8 +247,6 @@ function llenarCombo(data, id, propiedadMostrar, propiedadId, valueDefecto = "",
             contenido += "<option value='" + elemento[propiedadId] + "' "+ AtributoAdicional +" >" + elemento[propiedadMostrar] + "</option>"
         }
     }
-
-    
     contenido += "";
     document.getElementById(id).innerHTML = contenido;
 }   

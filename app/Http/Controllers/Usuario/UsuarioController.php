@@ -58,7 +58,7 @@ class UsuarioController extends Controller
         $USUARIO = ($P_TIPO_PERSONA == '1') ? $P_NRO_DOCUMENTO : $P_RUC;
 
         if ($P_CLAVE_CONFIRM != $P_CLAVE) {
-            dd($P_CLAVE_CONFIRM, $P_CLAVE);
+            // dd($P_CLAVE_CONFIRM, $P_CLAVE);
             return back()->with('error', 'Las contraseñas deben de coincidir');
         }
 

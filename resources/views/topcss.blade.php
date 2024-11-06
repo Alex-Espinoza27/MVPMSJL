@@ -5,7 +5,7 @@
 <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
 <link href="{{ asset('assets/css/metisMenu.min.css') }}" rel="stylesheet" type="text/css" />
 <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" id="appmodo-normal" />
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @php
 if(isset($header_css)){
         foreach($header_css as $item){

@@ -1,19 +1,19 @@
 
 // no se puede poner dentro del  abrimodal porque se repite dos veces el anexo
 $(document).ready(function () {
-    $('.repeater-default').repeater({
-        showFirstItem: false,
-        initEmpty: true,
-        defaultValues: {
-            'text-input': ''
-        },
-        show: function () {
-            $(this).slideDown();
-        },
-        hide: function (deleteElement) {
-            $(this).slideUp(deleteElement);
-        }
-    });
+    // $('.repeater-default').repeater({
+    //     showFirstItem: false,
+    //     initEmpty: true,
+    //     defaultValues: {
+    //         'text-input': ''
+    //     },
+    //     show: function () {
+    //         $(this).slideDown();
+    //     },
+    //     hide: function (deleteElement) {
+    //         $(this).slideUp(deleteElement);
+    //     }
+    // });
     getTupa();
 
 });
@@ -48,7 +48,6 @@ function limpiarModal() {
     textoMaximo.value = ""
     //  $('#textoMaximo').val('');
     console.log(textoMaximo.value);
-
     $("#P_ASUNTO").removeClass('invalid-feedback')
     $("#P_ASUNTO").removeClass('is-invalid');
     $("#textoMaximo").removeClass('invalid-feedback');
@@ -88,11 +87,14 @@ function getTupaSelect(event) {
     const select = event.target;
     // Obtén la opción seleccionada
     var selectedOption = select.options[select.selectedIndex];
-    // Obtén el valor del atributo dataAdicional
-    // console.log(selectedOption);
+    // Obtén el valor del atributo dataAdicional 
     var dataAdicional = selectedOption.getAttribute("dataAdicional");
-    const plazoElement = document.getElementById('plazo');
+    const plazoElement = document.getElementById('PLAZO_TUPA');
     plazoElement.textContent = dataAdicional || 'N/A';
+    document.getElementById("P_PLAZO_TUPA").value = (dataAdicional === 'N/A' || dataAdicional === null) ? 0 : dataAdicional;
+    // if (dataAdicional){ 
+    //     document.getElementById("P_PLAZO_TUPA").value = (dataAdicional=='N/A')?  0 : dataAdicional ;
+    // }
 }
 
 function getTipoDocumento() {
@@ -204,13 +206,14 @@ function uploadAnexo(event, cant = 2) {
     // });  
 }
 
-function registerSoli() {
+function registerSoli(event) {
     // Crear un objeto FormData para enviar los datos del formulario
     let formData = new FormData();
-
+    console.log("entro al form");
+    
     // Obtener valores de los campos de texto y selects
     formData.append('P_TUPA', document.getElementById('P_TUPA').value);
-    formData.append('plazo', document.getElementById('plazo').innerText);  // Si 'plazo' es un <strong> dentro de una etiqueta
+    formData.append('PLAZO_TUPA', document.getElementById('PLAZO_TUPA').innerText);  // Si 'plazo' es un <strong> dentro de una etiqueta
     formData.append('P_ASUNTO', document.getElementById('P_ASUNTO').value);
     formData.append('P_TIPO_DOCUMENTO', document.getElementById('P_TIPO_DOCUMENTO').value);
     formData.append('P_NRO_EXPEDIENTE', document.getElementById('P_NRO_EXPEDIENTE').value);
@@ -252,3 +255,20 @@ function registerSoli() {
     //     });
 }
 
+function showMessageSweetRegister(p_ico,p_title) {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            // toast.onmouseenter = Swal.stopTimer;s
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
+    Toast.fire({
+        icon: p_ico,
+        title: p_title
+    });
+}
