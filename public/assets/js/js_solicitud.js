@@ -1,37 +1,60 @@
 
 // no se puede poner dentro del  abrimodal porque se repite dos veces el anexo
 $(document).ready(function () {
-    // $('.repeater-default').repeater({
-    //     showFirstItem: false,
-    //     initEmpty: true,
-    //     defaultValues: {
-    //         'text-input': ''
-    //     },
-    //     show: function () {
-    //         $(this).slideDown();
-    //     },
-    //     hide: function (deleteElement) {
-    //         $(this).slideUp(deleteElement);
-    //     }
-    // });
-    getTupa();
-
+    $('.repeater-default').repeater({
+        showFirstItem: false,
+        initEmpty: true,
+        defaultValues: {
+            'text-input': ''
+        },
+        show: function () {
+            $(this).slideDown();
+        },
+        hide: function (deleteElement) {
+            $(this).slideUp(deleteElement);
+        }
+    });
 });
 
-
-function abrirModal() {
+$('#registrarNuevo').on('shown.bs.modal', function () {
+    // limpiarModal();
+    getTupa();
     $(".select2").select2({
         width: "100%",
         dropdownParent: $("#registrarNuevo")
     });
-    limpiarModal();
     getTipoDocumento();
-}
+});
+
+// function abrirModal() {
+//     $('.repeater-default').repeater({
+//         showFirstItem: false,
+//         initEmpty: true,
+//         defaultValues: {
+//             'text-input': ''
+//         },
+//         show: function () {
+//             $(this).slideDown();
+//         },
+//         hide: function (deleteElement) {
+//             $(this).slideUp(deleteElement);
+//         }
+//     });
+// }
+
+// window.onclick = function(event) {
+//     if (event.target == document.getElementById("registrarNuevo")) {
+//         limpiarModal();
+//     }
+// }
+
+
+$('#registrarNuevo').on('hidden.bs.modal', limpiarModal);
 
 
 function limpiarModal() {
-    console.log("entreo");
 
+    console.log("limpiar al modal");
     // Restablecer el estado de validación de Parsley
     $('.form-parsley').parsley().reset();
 
@@ -53,11 +76,10 @@ function limpiarModal() {
     $("#textoMaximo").removeClass('invalid-feedback');
     $("#textoMaximo").removeClass('valid-feedback');
 
-    document.getElementById('P_ARCHIVO_PRIN').value = null;
+    document.getElementById('P_ARCHIVO_PRIN').file = null;
     $('#P_ARCHIVO_PRIN').val('');
-    $('.dropify').dropify('destroy');
-    $('#P_ARCHIVO_PRIN').dropify();
-    console.log(document.getElementById('P_ARCHIVO_PRIN').value);
+    // $('.dropify').dropify('destroy');
+    // $('#P_ARCHIVO_PRIN').dropify();
 
     // Limpiar los anexos generados por el repeater
     $('input[id^="P_ANEXOS[]"]').each(function () {
@@ -66,16 +88,14 @@ function limpiarModal() {
 
     // Eliminar los anexos del repeater
     $('div[data-repeater-item]').each(function () {
-        $(this).remove();  // Elimina los elementos del repeater
+        $(this).remove();
     });
 
     //  // Restablecer al valor por defecto
     $('#P_TUPA').val('0').trigger('change');
-
 }
 function registrarSolicitud() {
 }
-
 function getTupa() {
     let url = 'tramite/solicitud/tupa';
     fetchGet(url, function (result) {
@@ -88,7 +108,8 @@ function getTupaSelect(event) {
     // Obtén la opción seleccionada
     var selectedOption = select.options[select.selectedIndex];
     // Obtén el valor del atributo dataAdicional 
-    var dataAdicional = selectedOption.getAttribute("dataAdicional");
+    var dataAdicional = (selectedOption.getAttribute("dataAdicional") )? selectedOption.getAttribute("dataAdicional"): 0 ;
+
     const plazoElement = document.getElementById('PLAZO_TUPA');
     plazoElement.textContent = dataAdicional || 'N/A';
     document.getElementById("P_PLAZO_TUPA").value = (dataAdicional === 'N/A' || dataAdicional === null) ? 0 : dataAdicional;
@@ -129,7 +150,7 @@ function longitudTextAsunto(inputID, IDmessage) {
     }
 }
 
-function uploadMainFail(event, cant = 2) {
+function uploadPrincipal(event, cant = 2) {
     const file = event.target.files[0];
     if (file) {
         const fileSize = file.size;
@@ -151,7 +172,7 @@ function uploadAnexo(event, cant = 2) {
     const file = event.target.files[0];
     const anexos = document.querySelectorAll('input[id="P_ANEXOS[]"]');
     const archivos = [];
-    var maxSizeTotal = (2) //* 1024 * 1024;
+    var maxSizeTotal = (30) //* 1024 * 1024; -> MAXIMO DE 30 MBs
     var totalMB = 0;
 
     console.log("entro");
@@ -160,15 +181,13 @@ function uploadAnexo(event, cant = 2) {
         const fileSize = file.size;
         const maxSize = cant * 1024 * 1024;
         console.log("entro al if: ", fileSize);
-        // Habilitarlo el span de agregar anexo
-        // document.getElementById('AGREGAR_ANEXO').style.pointerEvents = 'auto';
-        // document.getElementById('AGREGAR_ANEXO').style.opacity = '1';
-
         // Array de tipos de archivos permitidos
         const TiposPermitidos = [
             'application/pdf',
             'application/docx',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // Para .docx
+            'application/doc', // Para .docx
+            'application/msword', // Para .docx
             'image/jpeg',
             'image/png'
         ];
@@ -195,80 +214,9 @@ function uploadAnexo(event, cant = 2) {
         console.log("total MB:", totalMB);
         if (totalMB > maxSizeTotal) {
             showMessageSweet('error', 'Opss!', `Solamente se permiten ${maxSizeTotal} MB en total de anexos.`);
-            event.target.value = null;
-            // document.getElementById('AGREGAR_ANEXO').style.pointerEvents = 'none';
-            // document.getElementById('AGREGAR_ANEXO').style.opacity = '0.6';
+            event.target.value = null; 
             return false;
         }
     }
-    console.log("Archivos seleccionados:", archivos);
-    // $(document).on("click", "#AGREGAR_ANEXO", function() {
-    // });  
-}
-
-function registerSoli(event) {
-    // Crear un objeto FormData para enviar los datos del formulario
-    let formData = new FormData();
-    console.log("entro al form");
-    
-    // Obtener valores de los campos de texto y selects
-    formData.append('P_TUPA', document.getElementById('P_TUPA').value);
-    formData.append('PLAZO_TUPA', document.getElementById('PLAZO_TUPA').innerText);  // Si 'plazo' es un <strong> dentro de una etiqueta
-    formData.append('P_ASUNTO', document.getElementById('P_ASUNTO').value);
-    formData.append('P_TIPO_DOCUMENTO', document.getElementById('P_TIPO_DOCUMENTO').value);
-    formData.append('P_NRO_EXPEDIENTE', document.getElementById('P_NRO_EXPEDIENTE').value);
-    formData.append('P_ANIO_EXPEDIENTE', document.getElementById('P_ANIO_EXPEDIENTE').value);
-
-    // Obtener el archivo principal
-    const archivoPrincipal = document.getElementById('P_ARCHIVO_PRIN').files[0];
-    if (archivoPrincipal) {
-        formData.append('P_ARCHIVO_PRIN', archivoPrincipal);
-    }
-
-    // Obtener los anexos
-    const anexos = document.querySelectorAll('input[id^="P_ANEXOS[]"]');
-    anexos.forEach((input, index) => {
-        const archivoAnexo = input.files[0];
-        if (archivoAnexo) {
-            formData.append(`P_ANEXOS[${index}]`, archivoAnexo);  // Enviar anexos con nombre de campo P_ANEXOS[n]
-        }
-    });
-
-    console.log(formData);
-    
-    // Enviar el formulario a la ruta '/solicitud/registrar' con método POST
-    // fetch('/solicitud/registrar', {
-    //     method: 'POST',
-    //     body: formData,
-    //     headers: {
-    //         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')  // Para enviar el token CSRF
-    //     }
-    // })
-    //     .then(response => response.json())  // Aquí puedes manejar la respuesta, por ejemplo si es exitosa o si hay errores
-    //     .then(data => {
-    //         console.log(data);  // Aquí puedes manejar la respuesta de la API (como éxito o error)
-    //         alert('Solicitud registrada con éxito');
-    //     })
-    //     .catch(error => {
-    //         console.error('Error al registrar la solicitud:', error);
-    //         alert('Ocurrió un error al registrar la solicitud.');
-    //     });
-}
-
-function showMessageSweetRegister(p_ico,p_title) {
-    const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        didOpen: (toast) => {
-            // toast.onmouseenter = Swal.stopTimer;s
-            toast.onmouseleave = Swal.resumeTimer;
-        }
-    });
-    Toast.fire({
-        icon: p_ico,
-        title: p_title
-    });
+    console.log("Archivos seleccionados:", archivos);  
 }

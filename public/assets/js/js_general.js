@@ -22,7 +22,23 @@ function showMessage(tipo = '', contenido = '', titulo = '') {
     }
     toastr.remove(toast);
 }
-
+function showMessageSweetRegister(p_ico ='',p_title ='') {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            // toast.onmouseenter = Swal.stopTimer;s
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
+    Toast.fire({
+        icon: p_ico,
+        title: p_title
+    });
+}
 
 function showMessageSweet(tipo = '', titulo = '', contenido = '') {
     Swal.fire({

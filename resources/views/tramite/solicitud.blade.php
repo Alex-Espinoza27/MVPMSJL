@@ -1,3 +1,34 @@
+
+@if(session('success'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: '¡Éxito!',
+            text: "{{ session('success') }}",
+            icon: 'success',
+            confirmButtonText: 'Aceptar'
+        });
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        Swal.fire({
+            title: '¡Éxito!',
+            text: "{{ session('error') }}",
+            icon: 'error',
+            confirmButtonText: 'error'
+        });
+    });
+</script>
+@endif
+
+
+
+
+
 <div class="row">
     <div class="col-12">
         <div class="row">
@@ -78,7 +109,7 @@
                     <button type="button" class="btn btn-danger">BUSCAR</button>
                     <button type="button" class="btn btn-secondary">LIMPIAR</button>
                     <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#registrarNuevo"
-                        onclick="abrirModal()">REGISTRAR NUEVO</button>
+                        {{-- onclick="abrirModal()" id="abrirRegistroModal" --}}>REGISTRAR NUEVO</button>
                 </div>
             </div>
             <div class="card-body text-size-20">
@@ -214,7 +245,6 @@
     </div> <!-- end col -->
 </div> <!-- end row -->
 
-
 {{-- MODAL DE REGISTRO --}}
 <div class="modal fade" id="registrarNuevo" tabindex="-1" role="dialog" aria-labelledby="registrarNuevo"
     aria-hidden="false" data-bs-backdrop="static">
@@ -225,30 +255,10 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div><!--end modal-header-->
 
-            {{-- @if (session('error'))
-                <script>
-                    showMessageSweetRegister('error', session('error'));
-                </script>
-            @endif --}}
-            {{-- @if (session('success'))
-                <script> 
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: "top-end",
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true,
-                        didOpen: (toast) => { 
-                            toast.onmouseleave = Swal.resumeTimer;
-                        }
-                    });
-                    Toast.fire({
-                        icon: 'success',
-                        title:{{ session('success')}}
-                    });
-                </script> --}}
-            {{-- @endif --}}
-            <form class="form-parsley" action="{{ route('tramite.solicitud.registrar') }}" method="POST" enctype="multipart/form-data">
+
+            {{-- <form class="form-parsley" onsubmit="registrarSolicitud()" enctype="multipart/form-data" id="formDocumentos"> --}}
+            <form class="form-parsley" action="{{ route('tramite.solicitud.registrar') }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body">
                     <div class="row pb-3">
@@ -257,7 +267,7 @@
                             <span class="text-muted pb-3">(Opcional) </span>
                             <select class="select2 form-control mb-3 custom-select form-select"
                                 onchange="getTupaSelect(event,0)" style="width: 100%; height:36px;" id="P_TUPA"
-                                name="P_TUPA"> 
+                                name="P_TUPA">
                             </select>
                         </div>
                     </div>
@@ -359,7 +369,7 @@
                                     <input type="file" id="P_ARCHIVO_PRIN" name="P_ARCHIVO_PRIN"
                                         class="dropify rounded form-file" data-allowed-file-extensions="pdf"
                                         data-max-file-size-preview="50" required data-errors-position="outside"
-                                        onchange="uploadMainFail(event,50)" />
+                                        onchange="uploadPrincipal(event,50)" />
                                 </div>
                             </div>
                         </div>
@@ -395,9 +405,9 @@
                                                 <div data-repeater-item="">
                                                     <div class="form-group row d-flex align-items-end">
                                                         <div class="col-md-8">
-                                                            <input type="file" class="form-control rounded dropify"
-                                                                name="P_ANEXOS[]" id="P_ANEXOS[]"
-                                                                accept="application/pdf,image/png, image/jpeg,.doc,.docx"
+                                                            <input type="file" class="form-control rounded "
+                                                                name="P_ANEXOS" id="P_ANEXOS"
+                                                                accept="application/pdf,image/png,image/jpeg,.doc,.docx"
                                                                 data-max-file-size="20" data-errors-position="outside"
                                                                 onchange="uploadAnexo(event,20)" required>
                                                         </div>
