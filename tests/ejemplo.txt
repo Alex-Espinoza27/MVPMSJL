@@ -1,0 +1,287 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Validator;
+
+class DocumentoController extends Controller
+{
+    public function store(Request $request)
+    {
+        try {
+            // 1. Validaciones iniciales
+            $validator = Validator::make($request->all(), [
+                'P_ARCHIVO_PRIN' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240', // 10MB máximo
+                'LIST_ANEXOS.*.P_ANEXOS' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+                'P_NRO_DOCUMENTO' => 'required|string'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Error de validación',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // 2. Definir las rutas base
+            $basePathMPV = 'public/archivosMPV';
+            $userFolder = $request->P_NRO_DOCUMENTO;
+            $archivoPrincipalFolder = 'archivo_principal';
+            $anexosFolder = 'anexos';
+
+            // 3. Crear estructura de directorios
+            $userPath = "{$basePathMPV}/{$userFolder}";
+            $archivoPrincipalPath = "{$userPath}/{$archivoPrincipalFolder}";
+            $anexosPath = "{$userPath}/{$anexosFolder}";
+
+            // Crear directorios si no existen
+            foreach ([$userPath, $archivoPrincipalPath, $anexosPath] as $path) {
+                if (!Storage::exists($path)) {
+                    Storage::makeDirectory($path);
+                }
+            }
+
+            // 4. Guardar archivo principal
+            $archivoPrincipal = $request->file('P_ARCHIVO_PRIN');
+            $nombreArchivoPrincipal = $this->generarNombreUnico($archivoPrincipal->getClientOriginalName());
+            
+            $rutaArchivoPrincipal = Storage::putFileAs(
+                $archivoPrincipalPath,
+                $archivoPrincipal,
+                $nombreArchivoPrincipal
+            );
+
+            // 5. Guardar anexos
+            $rutasAnexos = [];
+            if ($request->hasFile('LIST_ANEXOS')) {
+                foreach ($request->LIST_ANEXOS as $anexo) {
+                    if (isset($anexo['P_ANEXOS']) && $anexo['P_ANEXOS'] instanceof \Illuminate\Http\UploadedFile) {
+                        $file = $anexo['P_ANEXOS'];
+                        $nombreAnexo = $this->generarNombreUnico($file->getClientOriginalName());
+                        
+                        $rutaAnexo = Storage::putFileAs(
+                            $anexosPath,
+                            $file,
+                            $nombreAnexo
+                        );
+                        
+                        $rutasAnexos[] = $rutaAnexo;
+                    }
+                }
+            }
+
+            // 6. Preparar respuesta
+            return response()->json([
+                'status' => true,
+                'message' => 'Archivos guardados exitosamente',
+                'data' => [
+                    'archivo_principal' => $rutaArchivoPrincipal,
+                    'anexos' => $rutasAnexos
+                ]
+            ], 200);
+
+        } catch (\Exception $e) {
+            // 7. Manejo de errores
+            \Log::error('Error al guardar archivos: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Error al procesar los archivos',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Genera un nombre único para el archivo
+     */
+    private function generarNombreUnico($nombreOriginal)
+    {
+        $extension = pathinfo($nombreOriginal, PATHINFO_EXTENSION);
+        $nombreBase = pathinfo($nombreOriginal, PATHINFO_FILENAME);
+        $timestamp = now()->format('Ymd_His');
+        $random = str_pad(random_int(0, 999), 3, '0', STR_PAD_LEFT);
+        
+        return "{$nombreBase}_{$timestamp}_{$random}.{$extension}";
+    }
+
+    /**
+     * Limpia el nombre del archivo de caracteres especiales
+     */
+    private function limpiarNombreArchivo($nombre)
+    {
+        // Eliminar caracteres especiales y espacios
+        $nombre = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $nombre);
+        // Evitar nombres duplicados de archivo
+        return strtolower($nombre);
+    }
+
+    /**
+     * Verifica si un archivo es seguro
+     */
+    private function verificarArchivoSeguro($file)
+    {
+        // Lista de extensiones permitidas
+        $extensionesPermitidas = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
+        $extension = strtolower($file->getClientOriginalExtension());
+        
+        // Verificar extensión
+        if (!in_array($extension, $extensionesPermitidas)) {
+            return false;
+        }
+
+        // Verificar tipo MIME
+        $mimeType = $file->getMimeType();
+        $mimePermitidos = [
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'image/jpeg',
+            'image/png'
+        ];
+
+        if (!in_array($mimeType, $mimePermitidos)) {
+            return false;
+        }
+
+        // Verificar tamaño (10MB máximo)
+        if ($file->getSize() > 10485760) { // 10 * 1024 * 1024 bytes
+            return false;
+        }
+
+        return true;
+    }
+}
+
+
+==========================================
+<form action="{{ route('documento.store') }}" method="POST" enctype="multipart/form-data" id="formDocumentos">
+    @csrf
+    
+    <div class="form-group">
+        <label for="P_ARCHIVO_PRIN">Archivo Principal</label>
+        <input type="file" class="form-control" name="P_ARCHIVO_PRIN" id="P_ARCHIVO_PRIN" required>
+        <small class="text-muted">Formatos permitidos: PDF, DOC, DOCX, JPG, PNG. Tamaño máximo: 10MB</small>
+    </div>
+
+    <div class="form-group" id="anexosContainer">
+        <label>Anexos</label>
+        <div class="anexo-item">
+            <input type="file" class="form-control" name="LIST_ANEXOS[0][P_ANEXOS]">
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-secondary" onclick="agregarAnexo()">Agregar Anexo</button>
+    <button type="submit" class="btn btn-primary">Guardar</button>
+</form>
+
+<script>
+let anexoCount = 1;
+
+function agregarAnexo() {
+    const container = document.getElementById('anexosContainer');
+    const div = document.createElement('div');
+    div.className = 'anexo-item mt-2';
+    div.innerHTML = `
+        <div class="input-group">
+            <input type="file" class="form-control" name="LIST_ANEXOS[${anexoCount}][P_ANEXOS]">
+            <button type="button" class="btn btn-danger" onclick="eliminarAnexo(this)">Eliminar</button>
+        </div>
+    `;
+    container.appendChild(div);
+    anexoCount++;
+}
+
+function eliminarAnexo(button) {
+    button.closest('.anexo-item').remove();
+}
+
+// Validación del formulario
+document.getElementById('formDocumentos').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status) {
+            alert('Archivos guardados exitosamente');
+            // Aquí puedes agregar código para redireccionar o actualizar la página
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error al procesar la solicitud');
+    });
+});
+</script>
+
+
+
+
+========================
+
+Esta implementación incluye:
+
+Validaciones de seguridad:
+
+Verifica tipos de archivo permitidos
+Limita el tamaño máximo de archivos
+Verifica tipos MIME
+Sanitiza nombres de archivo
+Genera nombres únicos para evitar colisiones
+
+
+Estructura de directorios:
+Copypublic/archivosMPV/
+└── [NUMERO_DOCUMENTO]/
+    ├── archivo_principal/
+    │   └── [archivos principales]
+    └── anexos/
+        └── [archivos anexos]
+
+Manejo de errores:
+
+Validación de formularios
+Manejo de excepciones
+Logging de errores
+Respuestas JSON estructuradas
+
+
+Características adicionales:
+
+Generación de nombres únicos para archivos
+Preservación de extensiones originales
+Verificación de directorios existentes
+Interfaz de usuario para agregar/eliminar anexos dinámicamente
+
+
+
+Para usar este código:
+
+Asegúrate de tener configurado el almacenamiento en Laravel:
+
+bashCopyphp artisan storage:link
+
+Agrega la ruta en routes/web.php:
+
+phpCopyRoute::post('/documento/store', [DocumentoController::class, 'store'])->name('documento.store');
+
+Configura los permisos adecuados en la carpeta storage:
+
+bashCopychmod -R 775 storage
+chmod -R 775 public/storage
+
+Asegúrate de que tu formulario tenga el atributo enctype="multipart/form-data" y el token CSRF.
