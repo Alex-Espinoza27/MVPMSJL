@@ -18,7 +18,7 @@
         <li class="dropdown">
             <a class="nav-link dropdown-toggle waves-effect waves-light nav-user" data-bs-toggle="dropdown" href="#" role="button"
                 aria-haspopup="false" aria-expanded="false">
-                <span class="ms-1 nav-user-name hidden-sm">Nick</span>
+                <span class="ms-1 nav-user-name hidden-sm">{{session('user')->USU_RAZON_SOCIAL}}</span>
                 <img src="{{ asset('assets/images/users/user-5.jpg') }}" alt="profile-user" class="rounded-circle thumb-xs" />                                 
             </a>
             <div class="dropdown-menu dropdown-menu-end">

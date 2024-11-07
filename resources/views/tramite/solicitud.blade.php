@@ -1,28 +1,27 @@
-
-@if(session('success'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            title: '¡Éxito!',
-            text: "{{ session('success') }}",
-            icon: 'success',
-            confirmButtonText: 'Aceptar'
+@if (session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: '¡Éxito!',
+                text: "{{ session('success') }}",
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            });
         });
-    });
-</script>
+    </script>
 @endif
 
-@if(session('error'))
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        Swal.fire({
-            title: '¡Éxito!',
-            text: "{{ session('error') }}",
-            icon: 'error',
-            confirmButtonText: 'error'
+@if (session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: '¡Éxito!',
+                text: "{{ session('error') }}",
+                icon: 'error',
+                confirmButtonText: 'error'
+            });
         });
-    });
-</script>
+    </script>
 @endif
 
 
@@ -56,19 +55,19 @@
                     <div class="col-md-4">
                         <div class="form-group mt-2 ">
                             <div class="form-group">
-                                <label class="form-label" for="FILTRO_NRO_DOCUMENTO">Número de Solicitud /
+                                <label class="form-label" for="FILTRO_EXPEDIENTE">Número de Solicitud /
                                     Expediente</label>
                                 <input type="text" class="form-control border border-info"
-                                    name="FILTRO_NRO_DOCUMENTO" id="FILTRO_NRO_DOCUMENTO"
+                                    name="FILTRO_EXPEDIENTE" id="FILTRO_EXPEDIENTE"
                                     placeholder="Ingrese el numero del expediente">
                             </div>
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group mt-2 ">
-                            <label class="form-label">Tipo Documento</label>
-                            <select name="FILTRO_TIPO_DOCUMENTO" class="form-select border border-info"
-                                id="FILTRO_TIPO_DOCUMENTO">
+                            <label class="form-label">Tipo Expediente</label>
+                            <select name="FILTRO_TIPO_EXPEDIENTE" class="form-select border border-info"
+                                id="FILTRO_TIPO_EXPEDIENTE">
                                 <option value="1" selected="">Todos</option>
                                 <option value="2">TUPA</option>
                                 <option value="3">SOLICITUD</option>
@@ -78,167 +77,75 @@
                     <div class="col-md-2">
                         <div class="form-group mt-2 ">
                             <label class="form-label">Estado del documento</label>
-                            <select name="FILTRO_ESTADO" class="form-select border border-info"
-                                id="FILTRO_TIPO_DOCUMENTO">
+                            <select name="FILTRO_ESTADO" class="form-select border border-info" id="FILTRO_ESTADO">
                                 <option value="1" selected="">Todos</option>
                                 <option value="2">PRESENTADO</option>
                                 <option value="3">OBSERVADO</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="form-group mt-2 ">
-                            <label class="form-label">Estado del documento</label>
-                            <select name="FILTRO_ESTADO" class="form-select border border-info "
-                                id="FILTRO_TIPO_DOCUMENTO">
-                                <option value="1" selected="">Todos</option>
-                                <option value="2">PRESENTADO</option>
-                                <option value="3">OBSERVADO</option>
+                                <option value="4">ANULADO</option>
                             </select>
                         </div>
                     </div>
                     <div class="col-md-2">
                         <div class="form-group mt-2">
-                            <label class="form-label" for="FILTRO_NRO_DOCUMENTO">Desde</label>
-                            <input type="date" class="form-control border border-info" name="FILTRO_NRO_DOCUMENTO"
-                                id="FILTRO_NRO_DOCUMENTO" placeholder="Ingrese el numero del expediente">
+                            <label class="form-label" for="FILTRO_FECHA_INICIO">Desde</label>
+                            <input type="date" class="form-control border border-info" name="FILTRO_FECHA_INICIO"
+                                id="FILTRO_FECHA_INICIO" placeholder="Ingrese el numero del expediente">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mt-2">
+                            <label class="form-label" for="FILTRO_FECHA_FIN">Hasta</label>
+                            <input type="date" class="form-control border border-info" name="FILTRO_FECHA_FIN"
+                                id="FILTRO_FECHA_FIN" placeholder="Ingrese el numero del expediente">
                         </div>
                     </div>
                 </div>
                 <div class="d-flex justify-content-end gap-3">
-                    <button type="button" class="btn btn-danger">BUSCAR</button>
+                    <button type="button" class="btn btn-danger" onclick="solicitudes();">BUSCAR</button>
                     <button type="button" class="btn btn-secondary">LIMPIAR</button>
                     <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#registrarNuevo"
                         {{-- onclick="abrirModal()" id="abrirRegistroModal" --}}>REGISTRAR NUEVO</button>
                 </div>
             </div>
             <div class="card-body text-size-20">
-                <table id="row_callback" class="table table-striped table-bordered dt-responsive nowrap"
-                    style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                    <thead class="secondary">
-                        <tr class="btn-secondary text-white">
-                            <th><strong>Numero Expediente</strong></th>
-                            <th><strong>Tipo</strong></th>
-                            <th><strong>Asunto</strong></th>
-                            <th><strong>Fecha</strong></th>
-                            <th><strong>Estado</strong></th>
-                            <th><strong>Fecha atencion</strong></th>
+                <table id="row_callback"  
+                class="table table-striped table-bordered dt-responsive nowrap" 
+                style="border-collapse: collapse; border-spacing: 0; border-color:black;  width: 100%; ">
+                <thead class="secondary">
+                        <tr class="btn-secondary text-white"> 
+                            <th><strong>SOLICITUD</strong></th>
+                            <th><strong>FECHA DE PRESENTACION</strong></th>
+                            <th><strong>NUMERO DE EXPEDIENTE</strong></th>
+                            <th><strong>FECHA EMITIDO</strong></th>
+                            <th><strong>ASUNTO</strong></th>
+                            <th><strong>OBSERVACIONES</strong></th>
+                            <th><strong>ANEXOS</strong></th>
+                            <th><strong>ESTADO</strong></th>
+                            <th><strong>ACCIONES</strong></th>
+
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>EXP-001</td>
-                            <td>Expediente</td>
-                            <td>Solicitud de información</td>
-                            <td>2024-01-15</td>
-                            <td>En Proceso</td>
-                            <td>2024-01-20</td>
-                        </tr>
-                        <tr>
-                            <td>SOL-002</td>
-                            <td>Solicitud</td>
-                            <td>Permiso de construcción</td>
-                            <td>2024-02-10</td>
-                            <td>Aprobado</td>
-                            <td>2024-02-15</td>
-                        </tr>
-                        <tr>
-                            <td>EXP-003</td>
-                            <td>Expediente</td>
-                            <td>Reclamo de servicio</td>
-                            <td>2024-03-05</td>
-                            <td>Resuelto</td>
-                            <td>2024-03-10</td>
-                        </tr>
-                        <tr>
-                            <td>SOL-002</td>
-                            <td>Solicitud</td>
-                            <td>Permiso de construcción</td>
-                            <td>2024-02-10</td>
-                            <td>Aprobado</td>
-                            <td>2024-02-15</td>
-                        </tr>
-                        <tr>
-                            <td>EXP-003</td>
-                            <td>Expediente</td>
-                            <td>Reclamo de servicio</td>
-                            <td>2024-03-05</td>
-                            <td>Resuelto</td>
-                            <td>2024-03-10</td>
-                        </tr>
-                        <tr>
-                            <td>SOL-002</td>
-                            <td>Solicitud</td>
-                            <td>Permiso de construcción</td>
-                            <td>2024-02-10</td>
-                            <td>Aprobado</td>
-                            <td>2024-02-15</td>
-                        </tr>
-                        <tr>
-                            <td>EXP-003</td>
-                            <td>Expediente</td>
-                            <td>Reclamo de servicio</td>
-                            <td>2024-03-05</td>
-                            <td>Resuelto</td>
-                            <td>2024-03-10</td>
-                        </tr>
-                        <tr>
-                            <td>SOL-004</td>
-                            <td>Solicitud</td>
-                            <td>Registro de empresa</td>
-                            <td>2024-04-01</td>
-                            <td>En Espera</td>
-                            <td>N/A</td>
-                        </tr>
-                        <tr>
-                            <td>EXP-005</td>
-                            <td>Expediente</td>
-                            <td>Queja de producto</td>
-                            <td>2024-04-20</td>
-                            <td>En Proceso</td>
-                            <td>2024-04-25</td>
-                        </tr>
-                        <tr>
-                            <td>SOL-006</td>
-                            <td>Solicitud</td>
-                            <td>Licencia de funcionamiento</td>
-                            <td>2024-05-12</td>
-                            <td>Aprobado</td>
-                            <td>2024-05-18</td>
-                        </tr>
-                        <tr>
-                            <td>EXP-007</td>
-                            <td>Expediente</td>
-                            <td>Actualización de datos</td>
-                            <td>2024-06-01</td>
-                            <td>En Espera</td>
-                            <td>N/A</td>
-                        </tr>
-                        <tr>
-                            <td>SOL-008</td>
-                            <td>Solicitud</td>
-                            <td>Informe de auditoría</td>
-                            <td>2024-06-15</td>
-                            <td>Resuelto</td>
-                            <td>2024-06-20</td>
-                        </tr>
-                        <tr>
-                            <td>EXP-009</td>
-                            <td>Expediente</td>
-                            <td>Consulta legal</td>
-                            <td>2024-07-10</td>
-                            <td>En Proceso</td>
-                            <td>2024-07-15</td>
-                        </tr>
-                        <tr>
-                            <td>SOL-010</td>
-                            <td>Solicitud</td>
-                            <td>Subsidio gubernamental</td>
-                            <td>2024-08-05</td>
-                            <td>Aprobado</td>
-                            <td>2024-08-10</td>
-                        </tr>
+                    <tbody id="DATA_SOLICITUD">
+                         
                     </tbody>
+                    
+                    {{-- @forelse ($SOLICITUDES as $SOLI)
+                        <tr>
+                            <td>{{ $SOLI->SOLI_NU_EMI }}</td>
+                            <td>{{ $SOLI->SOLI_FECHA }}</td>
+                            <td>{{ $SOLI->SOLI_NRO_EXPEDIENTE }}</td>
+                            <td>{{ $SOLI->SOLI_FECHA_EMISION }}</td>
+                            <td>{{ $SOLI->SOLI_ASUNTO }}</td>
+                            <td>{{ $SOLI->SOLI_OBSERVACION }}</td>
+                            <td>{{ $SOLI->ESTA_DESCRIPCION }}</td> 
+                            <td>ICONOS</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <p>NO HAY REGISTRO DE SOLICITUDES</p>
+                        </tr>
+                    @endforelse --}}
+
                 </table>
             </div>
         </div>

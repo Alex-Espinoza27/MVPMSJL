@@ -41,8 +41,10 @@ Route::middleware(['session.check'])->group(function () {
         // perfil / modificar
         Route::get('/logout', [UsuarioController::class, 'logout'])->name('logout');
     });
+
     Route::prefix('tramite')->group(function () {
         Route::get('/solicitud', [TramiteController::class, 'solicitud'])->name('solicitud');
+        Route::get('/solicitud/lista', [TramiteController::class,'listarSolicitud'])->name('solicitud.lista');
         Route::get('/solicitud/tupa', [TramiteController::class, 'tupa'])->name('solicitud.tupa');
         Route::get('/solicitud/tipoDocumento', [TramiteController::class, 'tipoDocumento'])->name('solicitud.tipoDocumento');
     

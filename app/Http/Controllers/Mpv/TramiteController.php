@@ -9,7 +9,7 @@ use App\Http\Controllers\Mpv\Models\Solicitud;
 use App\Http\Controllers\Mpv\Models\TipoDocumento;
 use App\Http\Controllers\Sgd\Models\Tupa;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\File;
@@ -27,7 +27,7 @@ class TramiteController extends Controller
         // dd("entro");
         $page_data['header_js'] = array(
             // select2 
-            // 'js/js_general.js',
+            'js/js_general.js',
             'js/js_solicitud.js',
             //table
             'plugins/datatables/jquery.dataTables.min.js',
@@ -45,9 +45,8 @@ class TramiteController extends Controller
             //tablas
             'plugins/datatables/dataTables.buttons.min.js',
             'plugins/datatables/buttons.bootstrap5.min.js',
-
-
         );
+
         $page_data['header_css'] = array(
             // select2 - table
             // 'plugins/select2/select2.min.css',
@@ -63,7 +62,15 @@ class TramiteController extends Controller
         $page_data['page_title'] = 'Mis Tramites';
         $page_data['breadcrumb'] = 'solicitud';
 
-        return view('index', $page_data);
+        // dd($SOLICITUDES);
+        return view('index', $page_data, );
+    }
+    public function listarSolicitud()
+    {
+        $USUARIO = session('user')->USU_NUMERO_DOCUMENTO;
+        $SOLICITUDES = DB::select('EXEC MDSJL.MOSTRAR_SOLICITUDES ?', [$USUARIO]);
+        // dd($SOLICITUDES);
+        return response()->json($SOLICITUDES);
     }
     public function tupa()
     {
@@ -85,8 +92,6 @@ class TramiteController extends Controller
         $P_NRO_EXPEDIENTE = $request->input('P_NRO_EXPEDIENTE');
         $P_ANIO_EXPEDIENTE = $request->input('P_ANIO_EXPEDIENTE');
         $P_ASUNTO = $request->input('P_ASUNTO');
-        // $P_ARCHIVO_PRIN =  $request->input('P_ARCHIVO_PRIN');
-        // $LIST_ANEXOS[] =$request->input('LIST_ANEXOS');
 
         $SOLICITUD = new Solicitud();
 
@@ -111,7 +116,6 @@ class TramiteController extends Controller
         // este campo se puede pasar EXPEDIENTE SOLICITUD -> el numero puede volar
         $SOLICITUD->TIPO_DOCUMENTO_ID = $P_TIPO_DOCUMENTO;
         $SOLICITUD->SOLI_NUMERO_DOCUMENTO = $P_NRO_DOCUMENTO;
-
         $SOLICITUD->SOLI_ASUNTO = $P_ASUNTO;
         $SOLICITUD->CREATED_AT = now()->format('Y-m-d H:i:s');
         $SOLICITUD->UPDATED_AT = now()->format('Y-m-d H:i:s');
@@ -121,15 +125,12 @@ class TramiteController extends Controller
         $SOLICITUD->COD_USUARIO = session('user')->USU_ID;
         $SOLICITUD->SOLI_ESTADO_ID = 1; //Pendiente
 
-
-        try { 
+        try {
             $SOLICITUD->save(); 
-            
-            $this->guardarArchivo($request, $SOLICITUD->SOLI_ID);
-            // return back()->with('success','aSasAS');
-            return redirect('/tramite/solicitud')->with('success', 'La Solicitud fue registrado con exito.');
+            $mensaje =  $this->guardarArchivo($request, $SOLICITUD->SOLI_ID);
+            return redirect('/tramite/solicitud')->with($mensaje['tipo'],$mensaje['mensaje']);
         } catch (\Exception $e) {
-            return response()->json(['error', $e]);
+            return ['error', $e->getMessage()]; 
             // return response()->json(['error' => $e->getMessage()], 500);
         }
     }
@@ -139,18 +140,19 @@ class TramiteController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'P_ARCHIVO_PRIN' => 'required|file|mimes:pdf|max:10240', // 10MB máximo
-                'LIST_ANEXOS.*.P_ANEXOS' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240'
+                'LIST_ANEXOS.*.P_ANEXOS' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:30000'
             ]);
-            
+
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Error de validación',
-                    'errors' => $validator->errors()
-                ], 422);
+                // return response()->json([
+                //     'status' => false,
+                //     'message' => 'Error de validación',
+                //     'errors' => $validator->errors()
+                // ], 422);
+                // return ['error',$validator->errors()];
+                return [ 'tipo' => 'error','mensaje' => $validator->errors()]; 
             }
-            
-            // 2. Definir las rutas base
+
             $BASE_PATH_MPV = 'ArchivosMPV';
             $USUARIO = session('user')->USU_NUMERO_DOCUMENTO;
             $ARCHIVO_PRIN_FOLDER = 'archivo_principal';
@@ -160,33 +162,30 @@ class TramiteController extends Controller
             $USUARIO_PATH = "{$BASE_PATH_MPV}/{$USUARIO}/{$SOLICITUD_ID}";
             $ARCHIVO_PRINCIPAL_PATH = "{$USUARIO_PATH}/{$ARCHIVO_PRIN_FOLDER}";
             $ANEXOS_PATH = "{$USUARIO_PATH}/{$ANEXOS_FOLDER}";
-            
+
             // Crear directorios si no existen
             foreach ([$USUARIO_PATH, $ARCHIVO_PRINCIPAL_PATH, $ANEXOS_PATH] as $PATH) {
                 if (!Storage::exists($PATH)) {
                     Storage::makeDirectory($PATH);
                 }
             }
-            
-            // 4. Guardar archivo principal
+
             $ARCHIVO_PRINCIPAL = $request->file('P_ARCHIVO_PRIN');
             $NOMBRE_ARCHIVOS_PRINCIPAL = $this->limpiarNombreArchivo($ARCHIVO_PRINCIPAL->getClientOriginalName());
             // $NOMBRE_ARCHIVOS_PRINCIPAL = $ARCHIVO_PRINCIPAL->getClientOriginalName();
-            
+
             $RUTA_ARCHIVO_PRINCIPAL = Storage::putFileAs(
                 $ARCHIVO_PRINCIPAL_PATH,
                 $ARCHIVO_PRINCIPAL,
                 $NOMBRE_ARCHIVOS_PRINCIPAL
             );
-            // Guarda el nombre y la ruta del archivo principal en una variable
             $ARCHIVO_PRINCIPAL_DATA = [
                 'nombre' => $NOMBRE_ARCHIVOS_PRINCIPAL,
                 'ruta' => $RUTA_ARCHIVO_PRINCIPAL
-            ]; 
-            
-            // 5. Guardar anexos
+            ];
+            // dd($ARCHIVO_PRINCIPAL_DATA, $SOLICITUD_ID);
             $ANEXOS_DATA = [];
-            if ($request->has('LIST_ANEXOS')) { 
+            if ($request->has('LIST_ANEXOS')) {
                 foreach ($request->file('LIST_ANEXOS') as $anexo) {
                     // Verificar si el archivo existe y es válido
                     if (isset($anexo['P_ANEXOS']) && $anexo['P_ANEXOS'] instanceof \Illuminate\Http\UploadedFile) {
@@ -205,65 +204,56 @@ class TramiteController extends Controller
                     }
                 }
             }
+            // dd($ANEXOS_DATA,$ARCHIVO_PRINCIPAL_DATA);
 
-            // dd($ARCHIVO_PRINCIPAL_DATA,$request);
-            
-            $this->cargarInformacioArchivos($ANEXOS_DATA, $ARCHIVO_PRINCIPAL_DATA,$SOLICITUD_ID);
-            // dd("se cargo el archivbos");
-
-        } catch (\Exception $e) {
-            // 7. Manejo de errores
-            \Log::error('Error al guardar archivos: ' . $e->getMessage());
-            return response()->json([
-                'status' => false,
-                'message' => 'Error al procesar los archivos',
-                'error' => $e->getMessage()
-            ], 500);
+            $mensaje = $this->cargarInformacioArchivos($ANEXOS_DATA, $ARCHIVO_PRINCIPAL_DATA, $SOLICITUD_ID);
+            return $mensaje; 
+        } catch (\Exception $e) { 
+            return [ 'tipo' => 'error','mensaje' => 'Ocurrio un problema al guardar los archivos en el local, comunicate con el administrador']; 
+            // return [ 'error','Ocurrio un problema al guardar los archivos en el local, comunicate con el administrador']; 
+            //     'error' => $e->getMessage()
         }
     }
-    private function cargarInformacioArchivos($ANEXOS_DATA = [], $ARCHIVO_PRINCIPAL_DATA,$SOLICITUD_ID)
-    {   
-        
-        // ARCHIVO PRINCIPAL
-        $ARCHIVO_PRIN = new  ArchivoPrincipal();
-        $ARCHIVO_PRIN->SOLICITUD_ID = $SOLICITUD_ID;
-        $ARCHIVO_PRIN->ARCHIPRIN_NOMBRE_FILE_ORIGEN =  $ARCHIVO_PRINCIPAL_DATA['ruta'];
-        // $ARCHIVO_PRIN->ARCHIPRIN_FILE = 
-        $ARCHIVO_PRIN->CREATED_AT = now()->format('Y-m-d H:i:s');
-        $ARCHIVO_PRIN->UPDATED_AT = now()->format('Y-m-d H:i:s');
-        // $ARCHIVO_PRIN->DELETED_AT = 
-        $ARCHIVO_PRIN->ARCHIPRIN_NOMBRE_FILE =  $ARCHIVO_PRINCIPAL_DATA['nombre'];
-        $ARCHIVO_PRIN->ARCHIPRIN_IS_UPLOAD = 0;
-
+    private function cargarInformacioArchivos($ANEXOS_DATA = [], $ARCHIVO_PRINCIPAL_DATA, $SOLICITUD_ID)
+    {
         try {
+            // ARCHIVO PRINCIPAL
+            $ARCHIVO_PRIN = new ArchivoPrincipal();
+            $ARCHIVO_PRIN->SOLICITUD_ID = $SOLICITUD_ID;
+            $ARCHIVO_PRIN->ARCHIPRIN_NOMBRE_FILE_ORIGEN = $ARCHIVO_PRINCIPAL_DATA['ruta'];
+            $ARCHIVO_PRIN->CREATED_AT = now()->format('Y-m-d H:i:s');
+            $ARCHIVO_PRIN->UPDATED_AT = now()->format('Y-m-d H:i:s');
+            $ARCHIVO_PRIN->ARCHIPRIN_NOMBRE_FILE = $ARCHIVO_PRINCIPAL_DATA['nombre'];
+            $ARCHIVO_PRIN->ARCHIPRIN_IS_UPLOAD = 0;
             $ARCHIVO_PRIN->save();
-        } catch (\Throwable $th) {
-            return response()->json(['error', 'Ocurrio un error al guardar los archivos, comunicate con el administrador']);
-        }
 
-        // ANEXOS
-        // $CORRELATIVO_ACTUAL = ($CORRELATIVO) ? $CORRELATIVO + 1 : 0;
-        // $CORRELATIVO = Anexo::max('ANEX_ID');
-        if (!empty($ANEXOS_DATA)) { 
-            // dd($ANEXOS_DATA, $ARCHIVO_PRINCIPAL_DATA);
-            foreach ($ANEXOS_DATA as $INDICE => $ITEM) {
-                $ANEXO = new Anexo();
-                $ANEXO->ANEX_NUMERO = $INDICE +1;
-                $ANEXO->SOLICITUD_ID = $SOLICITUD_ID;
-                $ANEXO->ANEX_NOMBRE_FILE_ORIGEN = $ITEM['ruta'];
-                $ANEXO->ANEX_DETALLE = $ITEM['nombre'];
-                $ANEXO->ANEX_IS_UPLOAD = 0;
-                $ANEXO->ANEX_IND_HABILITADO= 1; 
-                $ANEXO->CREATED_AT = now()->format('Y-m-d H:i:s');
-                $ANEXO->UPDATED_AT = now()->format('Y-m-d H:i:s');
-                $ANEXO->ANEX_NOMBRE_FILE = $ITEM['nombre'];
-    
-                try {
+            // ANEXOS
+            if (!empty($ANEXOS_DATA)) {
+                foreach ($ANEXOS_DATA as $INDICE => $ITEM) {
+                    $ANEXO = new Anexo();
+                    $ANEXO->ANEX_NUMERO = $INDICE + 1;
+                    $ANEXO->SOLICITUD_ID = $SOLICITUD_ID;
+                    $ANEXO->ANEX_NOMBRE_FILE_ORIGEN = $ITEM['ruta'];
+                    $ANEXO->ANEX_DETALLE = $ITEM['nombre'];
+                    $ANEXO->ANEX_IS_UPLOAD = 0;
+                    $ANEXO->ANEX_IND_HABILITADO = 1;
+                    $ANEXO->CREATED_AT = now()->format('Y-m-d H:i:s');
+                    $ANEXO->UPDATED_AT = now()->format('Y-m-d H:i:s');
+                    $ANEXO->ANEX_NOMBRE_FILE = $ITEM['nombre'];
+
                     $ANEXO->save();
-                } catch (\Throwable $th) {
-                    return response()->json(['error', 'Ocurrio un error al guardar los anexos, comunicate con el administrador']);
                 }
             }
+
+            // dd($ANEXOS_DATA);
+            $mensaje = ['tipo' => 'success', 'mensaje' =>'Se registro la solicitud exitosamente'];
+            // $mensaje = ['success', 'Se registro la solicitud exitosamente'];
+
+            return $mensaje;
+        } catch (\Throwable $th) {
+            return [ 'tipo' => 'error','mensaje' =>'Ocurrio un error al guardar los archivos en BD, comunicate con el administrador'];
+            // return [ 'error','Ocurrio un error al guardar los archivos en BD, comunicate con el administrador'];
+
         }
     }
     private function generarNombreUnico($nombreOriginal)
@@ -281,6 +271,4 @@ class TramiteController extends Controller
         // Evitar nombres duplicados de archivo
         return strtolower($nombre);
     }
-
- 
 }
