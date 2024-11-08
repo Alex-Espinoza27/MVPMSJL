@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Mpv;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Controller; 
 use App\Http\Controllers\Mpv\Models\Anexo;
 use App\Http\Controllers\Mpv\Models\ArchivoPrincipal;
+use App\Http\Controllers\Mpv\Models\Estado;
 use App\Http\Controllers\Mpv\Models\Solicitud;
 use App\Http\Controllers\Mpv\Models\TipoDocumento;
 use App\Http\Controllers\Sgd\Models\Tupa;
@@ -18,8 +19,17 @@ use Illuminate\Support\Facades\Validator;
 class TramiteController extends Controller
 {
     // public function __construct()
-    // {
+    // {        
+        
+    //     $P_ANIO_EXPEDIENTE = now()->format('Y');
+    //     dd($P_ANIO_EXPEDIENTE);
     //     $tipoDocumento = TipoDocumento::all(); 
+    //     try {
+    //         $estados = Estado::all();   
+    //         dd($estados);   
+    //     } catch (\Exception $e) {
+    //         dd(['error', $e->getMessage()]); 
+    //     }
     // }
 
     public function solicitud()
@@ -82,15 +92,21 @@ class TramiteController extends Controller
         $tipoDocumento = TipoDocumento::all();
         return response()->json($tipoDocumento);
     }
+    public function estadoDocumento()
+    {
+        $estados = Estado::all();  
+        return response()->json($estados);
+    }
+
     public function registrarSolicitud(Request $request)
     {
         // dd($request);
+        // $P_ANIO_EXPEDIENTE = $request->input('P_ANIO_EXPEDIENTE');
         $P_TUPA = $request->input('P_TUPA');
         $P_PLAZO_TUPA = $request->input('P_PLAZO_TUPA');
         $P_TIPO_DOCUMENTO = $request->input('P_TIPO_DOCUMENTO');
         $P_NRO_DOCUMENTO = $request->input('P_NRO_DOCUMENTO');
-        $P_NRO_EXPEDIENTE = $request->input('P_NRO_EXPEDIENTE');
-        $P_ANIO_EXPEDIENTE = $request->input('P_ANIO_EXPEDIENTE');
+        $P_NRO_FOLIOS = $request->input('P_NRO_FOLIOS');
         $P_ASUNTO = $request->input('P_ASUNTO');
 
         $SOLICITUD = new Solicitud();
@@ -98,25 +114,24 @@ class TramiteController extends Controller
         $CORRELATIVO_ACTUAL = Solicitud::max('SOLI_ID');
         $TEMP = $CORRELATIVO_ACTUAL + 1;
         $CORRELATIVO_NUEVO = str_pad($TEMP, 5, '0', STR_PAD_LEFT);
+        $P_ANIO_EXPEDIENTE = now()->format('Y');
 
         if ($P_TUPA != 0) {
             $SOLICITUD->SOLI_COD_TUPA = $P_TUPA;
-            // $SOLICITUD->TIPO_DOCUMENTO_ID = 1; //EXPEDIENTE
-            $SOLICITUD->SOLI_NU_EMI = 'EXP-' . $P_ANIO_EXPEDIENTE . '-' . $CORRELATIVO_NUEVO;
-        } else {
-            // $SOLICITUD->TIPO_DOCUMENTO_ID = 2; // SOLICITUD
-            $SOLICITUD->SOLI_NU_EMI = 'SOL-' . $P_ANIO_EXPEDIENTE . '-' . $CORRELATIVO_NUEVO;
+            // $SOLICITUD->SOLI_NU_EMI = 'EXP-' . $P_ANIO_EXPEDIENTE . '-' . $CORRELATIVO_NUEVO;
         }
 
+        $SOLICITUD->SOLI_NU_EMI = 'SOL-' . $P_ANIO_EXPEDIENTE . '-' . $CORRELATIVO_NUEVO;
         $SOLICITUD->SOLI_NU_ANN = $P_ANIO_EXPEDIENTE;
-        $SOLICITUD->SOLI_FECHA_EMISION = now()->format('Y-m-d H:i:s');
+        // $SOLICITUD->SOLI_FECHA_EMISION = now()->format('Y-m-d H:i:s'); // esto se registra al sgd
         $SOLICITUD->SOLI_FECHA = now()->format('Y-m-d H:i:s');
-        $SOLICITUD->SOLI_NRO_EXPEDIENTE = $P_NRO_EXPEDIENTE;
+        // $SOLICITUD->SOLI_NRO_EXPEDIENTE = $P_NRO_EXPEDIENTE;
 
         // este campo se puede pasar EXPEDIENTE SOLICITUD -> el numero puede volar
         $SOLICITUD->TIPO_DOCUMENTO_ID = $P_TIPO_DOCUMENTO;
         $SOLICITUD->SOLI_NUMERO_DOCUMENTO = $P_NRO_DOCUMENTO;
         $SOLICITUD->SOLI_ASUNTO = $P_ASUNTO;
+        $SOLICITUD->SOLI_FOLIOS = $P_NRO_FOLIOS;
         $SOLICITUD->CREATED_AT = now()->format('Y-m-d H:i:s');
         $SOLICITUD->UPDATED_AT = now()->format('Y-m-d H:i:s');
         // $SOLICITUD->DELETED_AT = 
@@ -126,20 +141,20 @@ class TramiteController extends Controller
         $SOLICITUD->SOLI_ESTADO_ID = 1; //Pendiente
 
         try {
-            $SOLICITUD->save(); 
-            $mensaje =  $this->guardarArchivo($request, $SOLICITUD->SOLI_ID);
-            return redirect('/tramite/solicitud')->with($mensaje['tipo'],$mensaje['mensaje']);
+            $SOLICITUD->save();
+            $mensaje = $this->guardarArchivos($request, $SOLICITUD->SOLI_ID);
+            return redirect('/tramite/solicitud')->with($mensaje['tipo'], $mensaje['mensaje']);
         } catch (\Exception $e) {
-            return ['error', $e->getMessage()]; 
+            return ['error', $e->getMessage()];
             // return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
-    public function guardarArchivo(Request $request, $SOLICITUD_ID)
+    public function guardarArchivos(Request $request, $SOLICITUD_ID)
     {
         try {
             $validator = Validator::make($request->all(), [
-                'P_ARCHIVO_PRIN' => 'required|file|mimes:pdf|max:10240', // 10MB máximo
+                'P_ARCHIVO_PRIN' => 'required|file|mimes:pdf|max:51200', // 10MB máximo
                 'LIST_ANEXOS.*.P_ANEXOS' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:30000'
             ]);
 
@@ -150,7 +165,8 @@ class TramiteController extends Controller
                 //     'errors' => $validator->errors()
                 // ], 422);
                 // return ['error',$validator->errors()];
-                return [ 'tipo' => 'error','mensaje' => $validator->errors()]; 
+                // return [ 'tipo' => 'error','mensaje' => $validator->errors()]; 
+                return ['tipo' => 'error', 'mensaje' => 'Fakta' . $validator->errors()];
             }
 
             $BASE_PATH_MPV = 'ArchivosMPV';
@@ -207,9 +223,9 @@ class TramiteController extends Controller
             // dd($ANEXOS_DATA,$ARCHIVO_PRINCIPAL_DATA);
 
             $mensaje = $this->cargarInformacioArchivos($ANEXOS_DATA, $ARCHIVO_PRINCIPAL_DATA, $SOLICITUD_ID);
-            return $mensaje; 
-        } catch (\Exception $e) { 
-            return [ 'tipo' => 'error','mensaje' => 'Ocurrio un problema al guardar los archivos en el local, comunicate con el administrador']; 
+            return $mensaje;
+        } catch (\Exception $e) {
+            return ['tipo' => 'error', 'mensaje' => 'Ocurrio un problema al guardar los archivos en el local, comunicate con el administrador'];
             // return [ 'error','Ocurrio un problema al guardar los archivos en el local, comunicate con el administrador']; 
             //     'error' => $e->getMessage()
         }
@@ -246,12 +262,12 @@ class TramiteController extends Controller
             }
 
             // dd($ANEXOS_DATA);
-            $mensaje = ['tipo' => 'success', 'mensaje' =>'Se registro la solicitud exitosamente'];
+            $mensaje = ['tipo' => 'success', 'mensaje' => 'Se registro la solicitud exitosamente'];
             // $mensaje = ['success', 'Se registro la solicitud exitosamente'];
 
             return $mensaje;
         } catch (\Throwable $th) {
-            return [ 'tipo' => 'error','mensaje' =>'Ocurrio un error al guardar los archivos en BD, comunicate con el administrador'];
+            return ['tipo' => 'error', 'mensaje' => 'Ocurrio un error al guardar los archivos en BD, comunicate con el administrador'];
             // return [ 'error','Ocurrio un error al guardar los archivos en BD, comunicate con el administrador'];
 
         }
@@ -271,4 +287,72 @@ class TramiteController extends Controller
         // Evitar nombres duplicados de archivo
         return strtolower($nombre);
     }
+    public function filtrarSolicitud(Request $request)
+    {
+        // 1. Validación
+        $validator = Validator::make($request->all(), [
+            'FILTRO_EXPEDIENTE' => 'nullable|string|max:255',
+            'FILTRO_TIPO_EXPEDIENTE' => 'nullable|in:1,2,3',
+            'FILTRO_ESTADO' => 'nullable|in:1,2,3,4',
+            'FILTRO_FECHA_INICIO' => 'nullable|date',
+            'FILTRO_FECHA_FIN' => 'nullable|date',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            // 2. Preparar los parámetros base
+            $params = [];
+            $queryParts = [];
+
+            // Documento de usuario (obligatorio)
+            $NUMERO_DOCUMENTO_PERSONA = session('user')->USU_NUMERO_DOCUMENTO;
+            $queryParts[] = "@NUMERO_DOCUMENTO_PERSONA = N'" . $NUMERO_DOCUMENTO_PERSONA . "'";
+
+            // Número de expediente
+            if ($request->FILTRO_EXPEDIENTE && $request->FILTRO_EXPEDIENTE != '0') {
+                $queryParts[] = "@P_NU_EMI = N'" . $request->FILTRO_EXPEDIENTE . "'";
+            }
+
+            // Tipo de expediente
+            if ($request->FILTRO_TIPO_EXPEDIENTE && $request->FILTRO_TIPO_EXPEDIENTE != '0') {
+                $queryParts[] = "@P_TIPO_EXPEDIENTE = " . $request->FILTRO_TIPO_EXPEDIENTE;
+            }
+
+            // Estado
+            if ($request->FILTRO_ESTADO && $request->FILTRO_ESTADO != '0') {
+                $queryParts[] = "@P_ESTADO = " . $request->FILTRO_ESTADO;
+            }
+
+            // Fecha inicio
+            if ($request->FILTRO_FECHA_INICIO) {
+                $queryParts[] = "@P_DESDE = '" . $request->FILTRO_FECHA_INICIO . "'";
+            }
+
+            // Fecha fin (con valor por defecto si no se proporciona)
+            $fechaFin = $request->FILTRO_FECHA_FIN ?: now()->format('Y-m-d');
+            $queryParts[] = "@P_HASTA = '" . $fechaFin . "'";
+
+            // 3. Construir la consulta final
+            $query = "EXEC [MDSJL].[FILTRAR_SOLICITUD] " . implode(", ", $queryParts);
+
+            // 4. Ejecutar la consulta
+            $RESULTADO = DB::select($query);
+
+            // 5. Retornar resultado como JSON
+            return response()->json([
+                'status' => 'success',
+                'data' => $RESULTADO
+            ]);
+
+        } catch (\Exception $e) { 
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error al procesar la solicitud'
+            ], 500);
+        }
+    }
+    
 }

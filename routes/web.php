@@ -45,8 +45,12 @@ Route::middleware(['session.check'])->group(function () {
     Route::prefix('tramite')->group(function () {
         Route::get('/solicitud', [TramiteController::class, 'solicitud'])->name('solicitud');
         Route::get('/solicitud/lista', [TramiteController::class,'listarSolicitud'])->name('solicitud.lista');
+        Route::post('/solicitud/filtro', [TramiteController::class,'filtrarSolicitud'])->name('solicitud.filtro');
+
         Route::get('/solicitud/tupa', [TramiteController::class, 'tupa'])->name('solicitud.tupa');
         Route::get('/solicitud/tipoDocumento', [TramiteController::class, 'tipoDocumento'])->name('solicitud.tipoDocumento');
+        Route::get('/solicitud/estadoDocumento', [TramiteController::class, 'estadoDocumento'])->name('solicitud.estadoDocumento');
+
     
         Route::post('/solicitud/registrar', [TramiteController::class,'registrarSolicitud'])->name('tramite.solicitud.registrar');
     });

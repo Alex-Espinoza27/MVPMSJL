@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Mpv\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TipoDocumento extends Model
@@ -11,5 +9,5 @@ class TipoDocumento extends Model
     protected $primaryKey = 'TIPDOC_ID';
     public $timestamps = false;
     public $incrementing = false;
-    protected $keyType = 'string'; // Importante: indica que es string
+    protected $keyType = 'string'; // Importante: indica que es string el PK
 }

@@ -14,7 +14,8 @@ $(document).ready(function () {
             $(this).slideUp(deleteElement);
         }
     });
-    solicitudes(0) ;
+    solicitudes(); // solo listar
+    getEstadoDocumento();
 });
 
 $('#registrarNuevo').on('shown.bs.modal', function () {
@@ -25,6 +26,7 @@ $('#registrarNuevo').on('shown.bs.modal', function () {
         dropdownParent: $("#registrarNuevo")
     });
     getTipoDocumento();
+    
 });
 
 // function abrirModal() {
@@ -49,21 +51,17 @@ $('#registrarNuevo').on('shown.bs.modal', function () {
 //     }
 // }
 
-
 $('#registrarNuevo').on('hidden.bs.modal', limpiarModal);
-
 
 function limpiarModal() {
 
     console.log("limpiar al modal");
-    // Restablecer el estado de validación de Parsley
-    $('.form-parsley').parsley().reset();
+    $('#P_NRO_FOLIOS').val('');
+    // $('#P_ANIO_EXPEDIENTE').val('2024').trigger('change');
 
-    // Limpiar todos los campos de texto y textarea
+    $('.form-parsley').parsley().reset();
     $('#P_NRO_DOCUMENTO').val('');
-    $('#P_NRO_EXPEDIENTE').val('');
-    $('#P_TIPO_DOCUMENTO').val('').trigger('change');  // Para limpiar y restablecer el select2 si usas select2
-    $('#P_ANIO_EXPEDIENTE').val('2024').trigger('change'); // Restablecer el valor por defecto
+    $('#P_TIPO_DOCUMENTO').val('').trigger('change');
 
     //  Todo anexos
     $('#P_ASUNTO').val('');
@@ -95,8 +93,7 @@ function limpiarModal() {
     //  // Restablecer al valor por defecto
     $('#P_TUPA').val('0').trigger('change');
 }
-function registrarSolicitud() {
-}
+
 function getTupa() {
     let url = 'tramite/solicitud/tupa';
     fetchGet(url, function (result) {
@@ -114,9 +111,7 @@ function getTupaSelect(event) {
     const plazoElement = document.getElementById('PLAZO_TUPA');
     plazoElement.textContent = dataAdicional || 'N/A';
     document.getElementById("P_PLAZO_TUPA").value = (dataAdicional === 'N/A' || dataAdicional === null) ? 0 : dataAdicional;
-    // if (dataAdicional){ 
-    //     document.getElementById("P_PLAZO_TUPA").value = (dataAdicional=='N/A')?  0 : dataAdicional ;
-    // }
+
 }
 
 function getTipoDocumento() {
@@ -125,6 +120,14 @@ function getTipoDocumento() {
         llenarCombo(result, 'P_TIPO_DOCUMENTO', 'TIPDOC_DESCRIPCION', 'TIPDOC_ID', '', '', '');
     });
 }
+function getEstadoDocumento() {
+    let url = 'tramite/solicitud/estadoDocumento';
+    fetchGet(url, function (result) {
+        console.log(result);
+        llenarCombo(result, 'FILTRO_ESTADO', 'ESTA_DESCRIPCION', 'ESTA_ID',0);
+    });
+}
+
 
 function longitudTextAsunto(inputID, IDmessage) {
     const mensaje = document.querySelector('#' + inputID);
@@ -173,7 +176,7 @@ function uploadAnexo(event, cant = 2) {
     const file = event.target.files[0];
     const anexos = document.querySelectorAll('input[id="P_ANEXOS"]');
     console.log(anexos);
-    
+
     const archivos = [];
     var maxSizeTotal = (30) //* 1024 * 1024; -> MAXIMO DE 30 MBs
     var totalMB = 0;
@@ -224,194 +227,97 @@ function uploadAnexo(event, cant = 2) {
     console.log("Archivos seleccionados:", archivos);
 }
 
-// function solicitudes() {
-//     let url = 'tramite/solicitud/lista';
-//     $('#DATA_SOLICITUD').empty();
-//     fetchGet(url, function (result) {
-//         // console.log(result);
-//         result.forEach(element => {
-//             $('#DATA_SOLICITUD').append(
-//                 '<tr class="odd">' +
-//                     '<td  class="sorting_1">' + element.SOLI_NU_EMI + '</td>' +
-//                     '<td>' + element.SOLI_FECHA + '</td>' +
-//                     '<td>' + element.SOLI_NRO_EXPEDIENTE + '</td>' +
-//                     '<td>' + element.SOLI_FECHA_EMISION + '</td>' +
-//                     '<td>' + element.SOLI_ASUNTO + '</td>' +
-//                     '<td>' + element.SOLI_OBSERVACION + '</td>' +
-//                     '<td>' + element.ESTA_DESCRIPCION + '</td>' +
-//                     '<td> ACCIONES </td>' +
-//                 '</tr>'
-//             );
-//         });
-
-//         $('#row_callback').DataTable({
-//             'searching': true,
-//             'paging': true,
-//             'ordering': true,
-//             'info': true,
-//             'responsive': true
-//         });
-//     });
-// }
-function solicitudes(filtro) {
-    var url = 'tramite/solicitud/lista';
-    if (filtro === 1) { // 0 => sin filtro
-        url = 'tramite/solicitud/lista';
-        
-    }
-    fetchGet(url, function (result) {
-        // Botones personalizados
-        const BOTONES = `
-            <div class = "">
-                <button type="button" class="btn btn-purple"><i class="fas fa-eye m-1"></i>VER DATOS </button>
-                <button type="button" class="btn btn-success"><i class="fas fa-route m-1"></i>VER SEGUIMIENTO</button>
-            </div>
-            `;
-        // Inicializa la tabla con los datos obtenidos
-        $('#row_callback').DataTable({
-            data: result,
-            columns: [
-                { data: 'SOLI_NU_EMI' },
-                { data: 'SOLI_FECHA' },
-                { data: 'SOLI_NRO_EXPEDIENTE' },
-                { data: 'SOLI_FECHA_EMISION' },
-                { data: 'SOLI_ASUNTO' },
-                { data: 'SOLI_OBSERVACION' },
-                { data: 'CANTIDAD_ANEXO' },
-                {  
-                    data: null,  // Especificamos `null` ya que estamos renderizando manualmente
-                    render: function (data, type, row) {
-                        // Toma directamente la clase de `SOLI_ESTADO_COLOR`
-                        return `<span class="${row.ESTA_COLOR}">${row.ESTA_DESCRIPCION}</span>`;
-                    }
-                },
-                {
-                    data: null,  // Especificamos `null` ya que estamos renderizando manualmente
-                    render: function () {
-                        return BOTONES;
-                    }
-                }
-            ],
-            responsive: true,
-            destroy: true  // Esto permite recargar la tabla sin duplicados
-        });
-    });
-}
-
-function filtroStore() {
-    const FILTRO_EXPEDIENTE = document.getElementById('FILTRO_EXPEDIENTE');
-    const FILTRO_TIPO_EXPEDIENTE = document.getElementById('FILTRO_TIPO_EXPEDIENTE');
-    const FILTRO_ESTADO = document.getElementById('FILTRO_ESTADO');
-    const FILTRO_FECHA_INICIO = document.getElementById('FILTRO_FECHA_INICIO');
-    const FILTRO_FECHA_HASTA = document.getElementById('FILTRO_FECHA_HASTA');
-
-}
-
-//  =================================================================================
-
-// Función para inicializar y renderizar la tabla
 function solicitudes() {
-    let url = 'tramite/solicitud/lista';
+    var url = 'tramite/solicitud/lista';
     fetchGet(url, function (result) {
-        const BOTONES = 
-            `<div class="">
-                <button type="button" class="btn btn-purple"><i class="fas fa-eye m-1"></i>VER DATOS </button>
-                <button type="button" class="btn btn-success"><i class="fas fa-route m-1"></i>VER SEGUIMIENTO</button>
-            </div>`;
+        data = result;
+        mostrarData(data);
+    });
+    
+    $('#FILTRO_EXPEDIENTE').val(''); 
+    $('#FILTRO_TIPO_EXPEDIENTE').val('0'); 
 
-        // Inicializa la tabla con los datos obtenidos
-        const table = $('#row_callback').DataTable({
-            data: result,
-            columns: [
-                { data: 'SOLI_NU_EMI' },
-                { data: 'SOLI_FECHA' },
-                { data: 'SOLI_NRO_EXPEDIENTE' },
-                { data: 'SOLI_FECHA_EMISION' },
-                { data: 'SOLI_ASUNTO' },
-                { data: 'SOLI_OBSERVACION' },
-                { data: 'CANTIDAD_ANEXO' },
-                {  
-                    data: null,
-                    render: function (data, type, row) {
-                        return `<span class="${row.ESTA_COLOR}">${row.ESTA_DESCRIPCION}</span>`;
-                    }
-                },
-                {
-                    data: null,
-                    render: function () {
-                        return BOTONES;
-                    }
+    $('#FILTRO_ESTADO').val('0').trigger('change');
+    $('#FILTRO_FECHA_INICIO').val('');
+    $('#FILTRO_FECHA_FIN').val('');
+
+}
+// ==============================================================================================
+
+function mostrarData(data) {
+    const BOTONES = `
+            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>
+                <div class="dropdown-menu">
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-purple"><i class="fas fa-eye m-1"></i>VER DATOS </button>
+                        <button type="button" class="btn btn-info"><i class="fas fa-route m-1"></i>VER SEGUIMIENTO</button>
+                    </div>    
+                </div>
+            <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-trash"></i></button>
+            `;
+
+    $('#row_callback').DataTable({
+        data: data,
+        columns: [
+            { data: 'SOLI_NU_EMI' },
+            { data: 'SOLI_FECHA' },
+            { data: 'SOLI_NRO_EXPEDIENTE' },
+            { data: 'SOLI_FECHA_EMISION' },
+            { data: 'SOLI_ASUNTO' },
+            { data: 'SOLI_OBSERVACION' },
+            { data: 'CANTIDAD_ANEXO' },
+            {
+                data: null,  // Especificamos `null` ya que estamos renderizando manualmente
+                render: function (data, type, row) {
+                    // Toma directamente la clase de `SOLI_ESTADO_COLOR`
+                    return `<span class="${row.ESTA_COLOR}">${row.ESTA_DESCRIPCION}</span>`;
                 }
-            ],
-            responsive: true,
-            destroy: true  // Esto permite recargar la tabla sin duplicados
-        });
-
-        // Asocia los filtros con la tabla
-        aplicarFiltros(table);
-    });
-}
-
-// Función para aplicar los filtros a la tabla
-function aplicarFiltros(table) {
-    // Captura los elementos de filtro
-    const FILTRO_EXPEDIENTE = document.getElementById('FILTRO_EXPEDIENTE');
-    const FILTRO_TIPO_EXPEDIENTE = document.getElementById('FILTRO_TIPO_EXPEDIENTE');
-    const FILTRO_ESTADO = document.getElementById('FILTRO_ESTADO');
-    const FILTRO_FECHA_INICIO = document.getElementById('FILTRO_FECHA_INICIO');
-    const FILTRO_FECHA_HASTA = document.getElementById('FILTRO_FECHA_HASTA');
-
-    // Añadir eventos para cada filtro
-    FILTRO_EXPEDIENTE.addEventListener('keyup', function() {
-        table.column(2).search(this.value).draw();
-    });
-
-    FILTRO_TIPO_EXPEDIENTE.addEventListener('change', function() {
-        if (FILTRO_TIPO_EXPEDIENTE == '1') {
-            table.column(1).search(this.value).draw();
-        }
-        else if (FILTRO_TIPO_EXPEDIENTE == '1'){
-            table.column(1).search('EXP').draw();
-        }
-        else if (FILTRO_TIPO_EXPEDIENTE == '2'){
-            table.column(1).search('SOL').draw();
-        }
-
-    });
-
-    FILTRO_ESTADO.addEventListener('change', function() {
-        table.column(7).search(this.value).draw();
-    });
-
-    FILTRO_FECHA_INICIO.addEventListener('change', function() {
-        aplicarFiltroPorFecha(table, FILTRO_FECHA_INICIO, FILTRO_FECHA_HASTA);
-    });
-
-    FILTRO_FECHA_HASTA.addEventListener('change', function() {
-        aplicarFiltroPorFecha(table, FILTRO_FECHA_INICIO, FILTRO_FECHA_HASTA);
-    });
-}
-
-// Función para filtrar por rango de fechas
-function aplicarFiltroPorFecha(table, fechaInicioElem, fechaFinElem) {
-    const fechaInicio = fechaInicioElem.value;
-    const fechaFin = fechaFinElem.value;
-
-    table.draw(); // Redibuja la tabla para aplicar los filtros de fecha
-
-    // Custom filtering function for date range
-    $.fn.dataTable.ext.search.push(
-        function(settings, data, dataIndex) {
-            const fechaColumna = data[1]; // Ajusta al índice de la columna de fecha
-
-            if (fechaInicio && fechaFin) {
-                return (fechaColumna >= fechaInicio && fechaColumna <= fechaFin);
-            } else if (fechaInicio) {
-                return fechaColumna >= fechaInicio;
-            } else if (fechaFin) {
-                return fechaColumna <= fechaFin;
+            },
+            {
+                data: null,  // Especificamos `null` ya que estamos renderizando manualmente
+                render: function () {
+                    return BOTONES;
+                }
             }
-            return true;
+        ],
+        responsive: true,
+        destroy: true  // Esto permite recargar la tabla sin duplicados
+    });
+    
+}
+function aplicarFiltro() {
+    const url = 'tramite/solicitud/filtro';
+
+    // Obtener los valores de los filtros 
+    const filtroExpediente = document.getElementById('FILTRO_EXPEDIENTE').value;
+    const filtroTipoExpediente = document.getElementById('FILTRO_TIPO_EXPEDIENTE').value;
+    const filtroEstado = document.getElementById('FILTRO_ESTADO').value;
+    const filtroFechaInicio = document.getElementById('FILTRO_FECHA_INICIO').value;
+    const filtroFechaFin = document.getElementById('FILTRO_FECHA_FIN').value;
+
+    // Crear el objeto de datos
+    const dataFiltro = {
+        FILTRO_EXPEDIENTE: filtroExpediente,
+        FILTRO_TIPO_EXPEDIENTE: filtroTipoExpediente,
+        FILTRO_ESTADO: filtroEstado,
+        FILTRO_FECHA_INICIO: filtroFechaInicio,
+        FILTRO_FECHA_FIN: filtroFechaFin
+    };
+    // console.log(dataFiltro);
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+    if (!token) {
+        console.error('CSRF token not found');
+        return;
+    }
+    fetchPost(url, dataFiltro, function (result) {
+        if (result.status == 'success') {
+            // console.log("adentro",result.data);
+            // return result.data;
+            mostrarData(result.data);
         }
-    );
+        else {
+            showMessageSweet('warning', 'Ocurrio un problema', 'Al filtrar los datos ocurrio un problema, intentalo mas tarde')
+        }
+    })
 }

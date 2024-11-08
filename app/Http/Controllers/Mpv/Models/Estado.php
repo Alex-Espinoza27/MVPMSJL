@@ -1,5 +1,8 @@
 <?php
-namespace App\Http\Controllers\Mpv\Modals; 
+
+namespace App\Http\Controllers\Mpv\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Estado extends Model

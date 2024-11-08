@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Mpv\Models;
- 
 use Illuminate\Database\Eloquent\Model;
 
 class Anexo extends Model

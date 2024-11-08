@@ -160,11 +160,12 @@ function fetchPost(url, frm, callback, loading = true) {
     if (loading) {
         $("body").addClass("loader");
     }
-
+    
     fetch(urljs + url, {
         method: "POST",
         body: JSON.stringify(frm),
         headers: {
+            'Content-Type': 'application/json', 
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         },
     }).then(res => res.json())
