@@ -10,7 +10,11 @@ use App\Http\Controllers\Sgd\Models\Ubicacion;
 class UbigeoController extends Controller
 {
     public function departamentos(){
-        $Departamentos = Ubicacion::Where("STUBI",1)->get();
+        $Departamentos = Ubicacion::Where("STUBI",'1') 
+        ->whereNotIn('UBDEP', ['91','92','93','94','95'])
+        ->select('UBDEP','NODEP')
+        ->groupBy('UBDEP','NODEP')->get();
+        // dd($Departamentos);
         return response()->json($Departamentos);
     }
     public function provincias($deparmento){
@@ -32,3 +36,5 @@ class UbigeoController extends Controller
         return response()->json($distritos);
     }
 }
+
+ 

@@ -42,6 +42,8 @@ Route::middleware(['session.check'])->group(function () {
         Route::get('/perfil', [UsuarioController::class, 'perfilIndex'])->name('perfil');
         Route::get('/logout', [UsuarioController::class, 'logout'])->name('logout');
         Route::get('/usuarioRepresentante', [UsuarioController::class, 'usuarioRepresentante'])->name('usuario');
+        Route::post('/actualizarUsuario', [UsuarioController::class, 'actualizarPerfil'])->name('actualizarUsuario');
+
 
     });
 
@@ -54,7 +56,6 @@ Route::middleware(['session.check'])->group(function () {
         Route::get('/solicitud/tipoDocumento', [TramiteController::class, 'tipoDocumento'])->name('solicitud.tipoDocumento');
         Route::get('/solicitud/estadoDocumento', [TramiteController::class, 'estadoDocumento'])->name('solicitud.estadoDocumento');
 
-    
         Route::post('/solicitud/registrar', [TramiteController::class,'registrarSolicitud'])->name('tramite.solicitud.registrar');
     });
 });

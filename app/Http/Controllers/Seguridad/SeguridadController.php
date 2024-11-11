@@ -9,13 +9,16 @@ use App\Http\Controllers\Sgd\Models\Ubicacion;
 
 class SeguridadController extends Controller
 {
-    public function index(){
+    public function index()
+    {
         return view('seguridad.login');
     }
-    public function registrar(){
+    public function registrar()
+    {
         $departamentos = Ubicacion::where('STUBI', '1')
-                        ->select('UBDEP', 'NODEP')->distinct()->get();
-                        
+            ->select('UBDEP', 'NODEP')->distinct()->get();
+
         return view('seguridad.registrar', compact('departamentos'));
     }
+    
 }

@@ -130,23 +130,6 @@
                     <tbody id="DATA_SOLICITUD">
                          
                     </tbody>
-                    
-                    {{-- @forelse ($SOLICITUDES as $SOLI)
-                        <tr>
-                            <td>{{ $SOLI->SOLI_NU_EMI }}</td>
-                            <td>{{ $SOLI->SOLI_FECHA }}</td>
-                            <td>{{ $SOLI->SOLI_NRO_EXPEDIENTE }}</td>
-                            <td>{{ $SOLI->SOLI_FECHA_EMISION }}</td>
-                            <td>{{ $SOLI->SOLI_ASUNTO }}</td>
-                            <td>{{ $SOLI->SOLI_OBSERVACION }}</td>
-                            <td>{{ $SOLI->ESTA_DESCRIPCION }}</td> 
-                            <td>ICONOS</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <p>NO HAY REGISTRO DE SOLICITUDES</p>
-                        </tr>
-                    @endforelse --}}
 
                 </table>
             </div>

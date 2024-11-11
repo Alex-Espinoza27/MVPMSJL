@@ -2,9 +2,6 @@
 <div class="container">
     <form action="">
         <div class="row border-mjl">
-
-
-
             <div class="col-md-7">
                 <div class="card">
                     <div class="card-header bg-secondary">
@@ -13,8 +10,9 @@
                     <div class="card-body">
                         <div class="form-group mb-4 ">
                             <label class="form-label">Tipo de Persona</label>
-                            <select name="P_TIPO_PERSONA" class="form-select" id="P_TIPO_PERSONA">
-                                <option value="1" selected="">Persona Natural</option>
+                            <select name="P_TIPO_PERSONA" class="form-select" id="P_TIPO_PERSONA"
+                                onchange="tipoPersona();" disabled>
+                                <option value="1">Persona Natural</option>
                                 <option value="2">Persona Jurídica</option>
                             </select>
                         </div>
@@ -26,16 +24,16 @@
                                     <div class="form-group mb-2 " id="GROUP-RUC">
                                         <label class="form-label" for="P_RUC">RUC de la Empresa</label>
                                         <input type="text" maxlength="11" class="form-control" name="P_RUC"
-                                            id="P_RUC" placeholder="Ingrese el RUC"
+                                            id="P_RUC" placeholder="Ingrese el RUC" disabled
                                             oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                                     </div>
                                 </div>
-    
+
                                 <div class="col-md-6">
                                     <div class="form-group mb-0 " id="GROUP-RA_ZO">
                                         <label class="form-label" for="P_RAZON_SOCIAL">Razón Social</label>
-                                        <input type="text" class="form-control" name="P_RAZON_SOCIAL" id="P_RAZON_SOCIAL"
-                                            placeholder="Razón Social">
+                                        <input type="text" class="form-control" name="P_RAZON_SOCIAL"
+                                            id="P_RAZON_SOCIAL" placeholder="Razón Social" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -44,7 +42,7 @@
                                 <div class="form-group mb-4" id="GROUP-DIREC_EM">
                                     <label class="form-label" for="P_DIRECCION_EMPRESA">Dirección de la
                                         Empresa</label>
-                                    <input type="text" class="form-control" name="P_DIRECCION_EMPRESA"
+                                    <input type="text" class="form-control" name="P_DIRECCION_EMPRESA" disabled
                                         id="P_DIRECCION_EMPRESA" placeholder="Ingrese la dirección de la empresa">
                                 </div>
                             </div>
@@ -55,11 +53,13 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-2 ">
                                     <label class="form-label"> Tipo de Documento </label>
-                                    <select name="P_TIPO_DOCUMENTO" class="form-select" id="P_TIPO_DOCUMENTO">
+                                    <select name="P_TIPO_DOCUMENTO" class="form-select" id="P_TIPO_DOCUMENTO"
+                                        onchange="tipoDocumento();">
                                         <option value="1" selected="">Documento Nacional de
                                             Identidad </option>
                                         <option value="2">Carné de Extranjería</option>
                                         <option value="3">Pasaporte</option>
+
                                     </select>
                                 </div>
                             </div>
@@ -69,6 +69,7 @@
                                         Documento</label>
                                     <input type="text" class="form-control" name="P_NRO_DOCUMENTO"
                                         id="P_NRO_DOCUMENTO" placeholder="Ingrese el numero"
+                                        maxlength="12"
                                         oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
                                 </div>
                             </div>
@@ -101,7 +102,7 @@
                                         placeholder="Nombre" required>
                                 </div>
                             </div>
-    
+
                             <div class="col-md-6">
                                 <div class="form-group mb-2">
                                     <label class="form-label" for="P_DIRECCION_PERSONA">Dirección</label>
@@ -115,13 +116,8 @@
                             <div class="col-md-6">
                                 <div class="form-group ">
                                     <label class="form-label"> Departamento</label>
-                                    <select name="P_DEPARTAMENTO" class="form-select" id="P_DEPARTAMENTO" required>
-                                        <option value="" selected="">
-                                            ---------Seleccione---------</option>
-                                        {{-- @foreach ($departamentos as $departamento)
-                                        <option value="{{ $departamento->UBDEP }}">
-                                            {{ $departamento->NODEP }}</option>
-                                    @endforeach --}}
+                                    <select name="P_DEPARTAMENTO" class="form-select" id="P_DEPARTAMENTO" required
+                                        onchange="provincia(event);">
                                     </select>
                                 </div>
                             </div>
@@ -129,7 +125,7 @@
                                 <div class="form-group ">
                                     <label class="form-label">Provincia</label>
                                     <select name="P_PROVINCIA" class="form-select" id="P_PROVINCIA" required
-                                        disabled>
+                                        onchange="distrito(event);">
                                     </select>
                                 </div>
                             </div>
@@ -139,7 +135,7 @@
                             <div class="col-md-6">
                                 <div class="form-group ">
                                     <label class="form-label"> Distrito</label>
-                                    <select name="P_DISTRITO" class="form-select" id="P_DISTRITO" required disabled>
+                                    <select name="P_DISTRITO" class="form-select" id="P_DISTRITO" required>
                                     </select>
                                 </div>
                             </div>
@@ -164,21 +160,59 @@
                         </div>
                     </div>
                     <div class=" container m-3">
-                        <button type="button" name="actualizar" id="actualizar" class="btn btn-primary"> Actualizar
+                        <button type="button" name="actualizar" id="actualizar" class="btn btn-danger" onclick="actualizarDatos();"> Actualizar
                             Datos</button>
                         <button type="button" name="cancelar" id="cancelar" class="btn btn-secondary">
                             Cancelar</button>
                     </div>
-
                 </div>
             </div>
-            <div class="col-md-4   alert alert-light container d-flex justify-content-center aling-item-center h-100">
-                <figure>
-                    <img src="{{ asset('images/logo.png') }}" alt="Descripción de la imagen" class="img-fluid">
+            <div class="col-md-4 ">
+                <div class="card">
+                    <div class="card-body">  
+                        <div class="text-center dastone-profile-main">
+                            <div class="dastone-profile-main-pic">
+                                <img src="{{ asset('assets/images/users/user-8.jpg') }}" alt="" height="110"
+                                    class="rounded-circle">
+                                <span class="dastone-profile_main-pic-change "> <i class="fas fa-camera"></i></span>
+                            </div>
+                             
+                            {{-- <img class="me-3 rounded-circle thumb-xl" src="{{ asset('assets/images/users/user-8.jpg') }}"alt=""> --}}
+                            <div class="">
+                                <h5 class="mb-0">{{ session('user')->USU_CORREO }}</h5>
+                                <small class="text-muted">ADMINISTRADOR</small>                                  
+                            </div>                                       
+                            
+                        </div>
+                    </div><!--end card-body-->
+                </div><!--end card-->
 
-                    <figcaption>Este es el pie de foto o descripción de la imagen</figcaption>
-                </figure>
+
+
+
+
+                <div class="card">
+                    <div class="card-header bg-secondary">
+                        <h4 class="card-title text-white">Datos adicionales</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group mb-4">
+                            <label class="form-label">Genero</label>
+                            <select name="P_GENERO" class="form-select" id="P_GENERO">
+                                <option value="1">Masculino</option>
+                                <option value="2">Femenino</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mt-2">
+                                <label class="form-label" for="P_FECHA_NACIMIENTO">Fecha de Nacimiento</label>
+                                <input type="date" class="form-control border border-info"
+                                    name="P_FECHA_NACIMIENTO" id="P_FECHA_NACIMIENTO">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
-        </div>
     </form>
 </div>

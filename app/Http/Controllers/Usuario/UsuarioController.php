@@ -70,11 +70,11 @@ class UsuarioController extends Controller
         }
         $personaNatural = new Usuario();
 
-        $this->asignarAtributosRepetidos($personaNatural, $request);
+        $this->asignarAtributosRepetidos($personaNatural, $request, 1);
         if ($P_TIPO_PERSONA === '2') {
             $personaJuridica = new Usuario();
 
-            $this->asignarAtributosRepetidos($personaJuridica, $request);
+            $this->asignarAtributosRepetidos($personaJuridica, $request, 0);
             $personaJuridica->USU_NUMERO_DOCUMENTO = $P_RUC;
             $personaJuridica->USU_DIRECCION = trim($P_DIRECCION_EMPRESA);
             $personaJuridica->USU_RAZON_SOCIAL = trim($P_RAZON_SOCIAL);
@@ -97,20 +97,23 @@ class UsuarioController extends Controller
         $personaNatural->save();
         return redirect('/')->with('ok', 'Usuario registrado exitosamente.');
     }
-    private function asignarAtributosRepetidos($usuario, $request)
+    private function asignarAtributosRepetidos($usuario, $request, $esRepresentante = 0)
     {
         $usuario->USU_TIPO_PERSONA = $request->input('P_TIPO_PERSONA');
         $usuario->USU_TIPO_DOCUMENTO = $request->input('P_TIPO_DOCUMENTO');
         $usuario->USU_IND_ESTADO = '1';
-        $usuario->USU_CLAVE = Hash::make($request->input('P_CLAVE'));
         $usuario->USU_FEC_REGISTRO = now()->format('Y-m-d H:i:s');
         $usuario->USU_FEC_MODIFICACION = now()->format('Y-m-d H:i:s');
         $usuario->USU_NU_CELULAR = $request->input('P_CELULAR');
-        $usuario->USU_CORREO = $request->input('P_CORREO');
-        $usuario->USU_DEPARTAMENTO = $request->input('P_DEPARTAMENTO');
-        $usuario->USU_PROVINCIA = $request->input('P_PROVINCIA');
-        $usuario->USU_DISTRITO = $request->input('P_DISTRITO');
+        $usuario->USU_CLAVE = Hash::make($request->input('P_CLAVE'));
         $usuario->ID_ROLES = '1';
+
+        if ($esRepresentante == 1) {
+            $usuario->USU_CORREO = $request->input('P_CORREO');
+            $usuario->USU_DEPARTAMENTO = $request->input('P_DEPARTAMENTO');
+            $usuario->USU_PROVINCIA = $request->input('P_PROVINCIA');
+            $usuario->USU_DISTRITO = $request->input('P_DISTRITO');
+        }
     }
     private function registrarCiudadano($usuario)
     {
@@ -186,7 +189,7 @@ class UsuarioController extends Controller
                     $html .= '<li><a href="' . URL('/') . '/' . $row_op->OPCI_HREF . '"><span>' . $row_op->OPCI_ICON . ' ' . $row_op->OPCI_NOMBRE . '</span></a></li>';
                 }
             }
-        }   
+        }
         // dd( $html);
         // foreach($menuGlobal as $row_op2):
         //     if($row_op2->OPCI_TIPO==1):
@@ -251,13 +254,13 @@ class UsuarioController extends Controller
 
         $scriptAcceso = '<script>
 			$(document).ready(function() {';
-            foreach ($menuGlobal as $objetos):
-                if ($objetos->OPCI_TIPO == 4):
-                    $scriptAcceso .= '$("' . $objetos->OPCI_HREF . '").removeClass("d-none")';
-                endif;
-            endforeach;
-        
-            $scriptAcceso .= '})
+        foreach ($menuGlobal as $objetos):
+            if ($objetos->OPCI_TIPO == 4):
+                $scriptAcceso .= '$("' . $objetos->OPCI_HREF . '").removeClass("d-none")';
+            endif;
+        endforeach;
+
+        $scriptAcceso .= '})
 		</script>';
 
         // VALIDAMOS SOLO SUS URL
@@ -275,11 +278,13 @@ class UsuarioController extends Controller
         session(['SESS_ACCESOS' => $scriptAcceso]);
     }
 
-    public function perfilIndex(){
+    public function perfilIndex()
+    {
 
         $page_data['header_js'] = array(
             'js/jquery.min.js',
-            'js/js_general.js', 
+            'js/js_general.js',
+            'js/js_perfil.js',
             'plugins/dropify/js/dropify.min.js',
             'pages/jquery.form-upload.init.js',
             'pages/jquery.validation.init.js',
@@ -294,23 +299,66 @@ class UsuarioController extends Controller
         $page_data['page_name'] = 'perfil'; // nombre carpeta
         $page_data['page_title'] = 'Perfil';
         $page_data['breadcrumb'] = 'Perfil';
-        
-        return view('index',$page_data);
-    }
-    public function usuarioRepresentante(){
-        
-        $USUARIO = session('user');
-        if(session('user')->USU_TIPO_PERSONA == 2){
-            $DATA = array(
-                'usuario' => $USUARIO
-            );
-        }
-        $REPRESENTANTE = Usuario::where('ID_REPRESENTANTE', session('user')->REPRESENTANTE); 
-        
-        return response()->json($USUARIO,$REPRESENTANTE);
-    }
-    public function ActualizarPerfil(){
 
+        return view('index', $page_data);
+    }
+    public function usuarioRepresentante()
+    {
+
+        $USUARIO = session('user');
+        $DATA['usuario'] = $USUARIO;
+        // dd($DATA);
+        if ($USUARIO->USU_TIPO_PERSONA === "2") {
+            $REPRESENTANTE = Usuario::where('ID_REPRESENTANTE', $USUARIO->USU_ID)->first();
+            // dd($REPRESENTANTE);
+            $DATA['representante'] = $REPRESENTANTE;
+            // dd($DATA);
+        }
+
+        return response()->json($DATA);
+    }
+    public function actualizarPerfil(Request $request)
+    {
+        // dd($request->all());
+        $user = session('user');
+        if(session('user')->USU_TIPO_PERSONA == '2'){ // presona juridica
+            $user = Usuario::where('ID_REPRESENTANTE', session('user')->USU_ID)->first();
+        }
+        
+        if ($user) {
+            // Actualiza los campos solo si existen en la solicitud
+            // $user->P_TIPO_PERSONA = $request->input('P_TIPO_PERSONA', $user->P_TIPO_PERSONA);
+            // $user->P_RUC = $request->input('P_RUC', $user->P_RUC);
+            // $user->P_DIRECCION_EMPRESA = $request->input('P_DIRECCION_EMPRESA', $user->P_DIRECCION_EMPRESA);
+
+            
+            $user->USU_RAZON_SOCIAL =   $request->input('P_APELLIDO_PARTERNO'). " ". $request->input('P_APELLIDO_MATERNO') . " ".  $request->input('P_NOMBRES');
+            $user->USU_TIPO_DOCUMENTO = $request->input('P_TIPO_DOCUMENTO');
+            $user->USU_NUMERO_DOCUMENTO = $request->input('P_NRO_DOCUMENTO');
+            $user->USU_APE_PATERNO = $request->input('P_APELLIDO_PARTERNO');
+            $user->USU_APE_MATERNO = $request->input('P_APELLIDO_MATERNO');
+            $user->USU_NOMBRES = $request->input('P_NOMBRES');
+            $user->USU_DIRECCION = $request->input('P_DIRECCION_PERSONA');
+            $user->USU_DEPARTAMENTO = $request->input('P_DEPARTAMENTO');
+            $user->USU_PROVINCIA = $request->input('P_PROVINCIA');
+            $user->USU_DISTRITO = $request->input('P_DISTRITO');
+            $user->USU_NU_CELULAR = $request->input('P_CELULAR');
+            $user->USU_CORREO = $request->input('P_CORREO');
+
+            $user->USU_SEXO = $request->input('P_GENERO');
+            $user->USU_FEC_NACE = $request->input('P_FECHA_NACIMIENTO');
+
+            // if ($request->hasFile('imagen')) {
+            //     $path = $request->file('imagen')->store('public/imagenes');  
+            //     $user->imagen = $path;
+            // }
+
+            $user->save();
+            return response()->json(['tipo' => 'success', 'mensaje' => 'Los datos fueron actualizados con exito']);
+
+        }
+
+        return response()->json(['tipo' => 'error', 'mensaje' => 'Ocurrio un problema, intentalo mas tarde']);
     }
 
     public function logout()
@@ -328,3 +376,7 @@ class UsuarioController extends Controller
             ]);
     }
 }
+
+ 
+
+
