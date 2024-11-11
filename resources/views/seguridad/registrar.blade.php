@@ -321,11 +321,10 @@
             var rucIn = document.getElementById("P_RUC");
             var razIn = document.getElementById("P_RAZON_SOCIAL");
             var direIn = document.getElementById("P_DIRECCION_EMPRESA");
-
-            // Comprobar si los campos existen antes de intentar cambiarlos
+ 
             if (!rucField || !razField || !direcField) {
                 console.error("Uno o más campos no existen en el DOM");
-                return; // Salir si hay un error
+                return; 
             }
 
             if (this.value === "2") { // Persona Jurídica
@@ -370,12 +369,6 @@
 
     {{-- <script src="{{ url('assets/js/jquery.min.js') }}"></script> --}}
     <script>
-        // $.ajaxSetup({
-        //     headers: {
-        //         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        //     }
-        // });
-        // const appUrl = "{{ config('app.url') }}";
         $(document).ready(function() {
             $('#P_DEPARTAMENTO').change(function() {
                 var departamento = $(this).val();
@@ -428,7 +421,6 @@
                         '<option value="" selected="">---------Seleccione---------</option>');
                 }
             });
-
         });
     </script>
 </body>

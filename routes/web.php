@@ -28,7 +28,7 @@ Route::get('/registrar', [SeguridadController::class, 'registrar'])->name('segur
 Route::post('iniciar-sesion', [UsuarioController::class, 'login'])->name('login.submit');
 Route::post('registrar-usuario', [UsuarioController::class, 'store'])->name('login.registrar');
 
-
+Route::get('/departamentos', [UbigeoController::class,'departamentos'])->name('departamento');
 Route::get('/provincias/{departamento}', [UbigeoController::class,'provincias'])->name('departamento.provincias');
 Route::get('/distritos/{departamento}/{provincia}', action: [UbigeoController::class,'distritos'])->name('getDistritos');
 
@@ -39,7 +39,10 @@ Route::middleware(['session.check'])->group(function () {
 
     Route::prefix('usuario')->group(function () {
         // perfil / modificar
+        Route::get('/perfil', [UsuarioController::class, 'perfilIndex'])->name('perfil');
         Route::get('/logout', [UsuarioController::class, 'logout'])->name('logout');
+        Route::get('/usuarioRepresentante', [UsuarioController::class, 'usuarioRepresentante'])->name('usuario');
+
     });
 
     Route::prefix('tramite')->group(function () {

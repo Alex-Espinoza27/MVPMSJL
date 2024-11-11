@@ -110,6 +110,7 @@ class UsuarioController extends Controller
         $usuario->USU_DEPARTAMENTO = $request->input('P_DEPARTAMENTO');
         $usuario->USU_PROVINCIA = $request->input('P_PROVINCIA');
         $usuario->USU_DISTRITO = $request->input('P_DISTRITO');
+        $usuario->ID_ROLES = '1';
     }
     private function registrarCiudadano($usuario)
     {
@@ -153,10 +154,8 @@ class UsuarioController extends Controller
     }
     public function navbar($menuGlobal)
     {
-
         $html = '';
         $tipo = null;
-
         foreach ($menuGlobal as $row_op) {
             // Si es leyenda
             if ($row_op->OPCI_TIPO == 1) {
@@ -274,6 +273,44 @@ class UsuarioController extends Controller
         session(['SESS_USUA_ACCESOS' => $ACCESOS]);
         session(['SESS_NAVBAR' => $html]);
         session(['SESS_ACCESOS' => $scriptAcceso]);
+    }
+
+    public function perfilIndex(){
+
+        $page_data['header_js'] = array(
+            'js/jquery.min.js',
+            'js/js_general.js', 
+            'plugins/dropify/js/dropify.min.js',
+            'pages/jquery.form-upload.init.js',
+            'pages/jquery.validation.init.js',
+            'plugins/parsleyjs/parsley.min.js',
+            'js/metismenu.min.js'
+        );
+        $page_data['header_css'] = array(
+            'plugins/dropify/css/dropify.min.css',
+            'css/style.css'
+        );
+        $page_data['page_directory'] = 'seguridad'; // carpeta
+        $page_data['page_name'] = 'perfil'; // nombre carpeta
+        $page_data['page_title'] = 'Perfil';
+        $page_data['breadcrumb'] = 'Perfil';
+        
+        return view('index',$page_data);
+    }
+    public function usuarioRepresentante(){
+        
+        $USUARIO = session('user');
+        if(session('user')->USU_TIPO_PERSONA == 2){
+            $DATA = array(
+                'usuario' => $USUARIO
+            );
+        }
+        $REPRESENTANTE = Usuario::where('ID_REPRESENTANTE', session('user')->REPRESENTANTE); 
+        
+        return response()->json($USUARIO,$REPRESENTANTE);
+    }
+    public function ActualizarPerfil(){
+
     }
 
     public function logout()
