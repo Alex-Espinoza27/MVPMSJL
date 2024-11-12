@@ -8,10 +8,12 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Sgd\Models\Ciudadano;
 use App\Http\Controllers\Sgd\Models\PersonaJuridica;
 use App\Http\Controllers\Seguridad\Models\Usuario;
-use Session;
-
+use App\Http\Controllers\Seguridad\Models\Rol;
+use Illuminate\Support\Facades\Storage;
 class UsuarioController extends Controller
 {
+
+
     public function login(Request $request)
     {
         // dd($request);
@@ -26,18 +28,28 @@ class UsuarioController extends Controller
             'P_NRO_DOCUMENTO' => 'nullable|string|max:12',
             'P_CLAVE' => 'required|string',
         ]);
-        $NRO_USUARIO = ($TIPO_PERSONA == '1') ? $DNI : $RUC;
 
-        $USUARIO = Usuario::where('USU_NUMERO_DOCUMENTO', $NRO_USUARIO)->first();
+        $NRO_USUARIO = ($TIPO_PERSONA == '1') ? $DNI : $RUC;
+        $USUARIO = Usuario::where('USU_NUMERO_DOCUMENTO', $NRO_USUARIO)
+        ->where('USU_IND_ESTADO', 1)
+        ->first();
 
         if (!$USUARIO || !Hash::check($CLAVE, $USUARIO->USU_CLAVE)) {
             return back()->with('error', 'Las credenciales proporcionadas son incorrectas.');
         }
+
+        if ($TIPO_PERSONA === "2") {
+            $REPRESENTANTE = Usuario::where('ID_REPRESENTANTE', $USUARIO->USU_ID)->first();
+            session(['USUARIO_REPRESENTANTE' => $REPRESENTANTE]);
+        }
+
         $persmisos = $USUARIO->getPermisos();
-
         $this->navbar($persmisos);
-
         session(['user' => $USUARIO]);
+
+        $ROL_USUARIO = Rol::where('ROL_CODIGO', session('user')->ID_ROLES)->first();
+        session(['ROL_USER' => $ROL_USUARIO]);
+        // dd(session('user')->ID_ROLES);
         return redirect('/dashboard');
     }
     public function store(Request $request)
@@ -74,7 +86,7 @@ class UsuarioController extends Controller
         if ($P_TIPO_PERSONA === '2') {
             $personaJuridica = new Usuario();
 
-            $this->asignarAtributosRepetidos($personaJuridica, $request, 0);
+            $this->asignarAtributosRepetidos($personaJuridica, $request, 2);
             $personaJuridica->USU_NUMERO_DOCUMENTO = $P_RUC;
             $personaJuridica->USU_DIRECCION = trim($P_DIRECCION_EMPRESA);
             $personaJuridica->USU_RAZON_SOCIAL = trim($P_RAZON_SOCIAL);
@@ -97,22 +109,27 @@ class UsuarioController extends Controller
         $personaNatural->save();
         return redirect('/')->with('ok', 'Usuario registrado exitosamente.');
     }
-    private function asignarAtributosRepetidos($usuario, $request, $esRepresentante = 0)
+    private function asignarAtributosRepetidos($usuario, $request, $esRepresentante = 1)
     {
         $usuario->USU_TIPO_PERSONA = $request->input('P_TIPO_PERSONA');
-        $usuario->USU_TIPO_DOCUMENTO = $request->input('P_TIPO_DOCUMENTO');
-        $usuario->USU_IND_ESTADO = '1';
         $usuario->USU_FEC_REGISTRO = now()->format('Y-m-d H:i:s');
         $usuario->USU_FEC_MODIFICACION = now()->format('Y-m-d H:i:s');
-        $usuario->USU_NU_CELULAR = $request->input('P_CELULAR');
+        $usuario->USU_IND_ESTADO = '1';
         $usuario->USU_CLAVE = Hash::make($request->input('P_CLAVE'));
-        $usuario->ID_ROLES = '1';
-
-        if ($esRepresentante == 1) {
+        $usuario->ID_ROLES = '2';
+        
+        if (  $esRepresentante == 1) {  // persona natural  - y representante
+            $usuario->USU_TIPO_DOCUMENTO = $request->input('P_TIPO_DOCUMENTO');
+            $usuario->USU_TIPO_PERSONA = '1'; // siempre sera persona natural o representante
+            $usuario->USU_NU_CELULAR = $request->input('P_CELULAR');
             $usuario->USU_CORREO = $request->input('P_CORREO');
             $usuario->USU_DEPARTAMENTO = $request->input('P_DEPARTAMENTO');
             $usuario->USU_PROVINCIA = $request->input('P_PROVINCIA');
             $usuario->USU_DISTRITO = $request->input('P_DISTRITO');
+        }
+        
+        if($request->input('P_TIPO_PERSONA') == '2' && $esRepresentante == 1) {
+            $usuario->USU_CLAVE = '';
         }
     }
     private function registrarCiudadano($usuario)
@@ -273,9 +290,13 @@ class UsuarioController extends Controller
                 $ACCESOS[] = $data;
             endif;
         endforeach;
+
         session(['SESS_USUA_ACCESOS' => $ACCESOS]);
         session(['SESS_NAVBAR' => $html]);
         session(['SESS_ACCESOS' => $scriptAcceso]);
+        session(['FECHA_INGRESO' => now()->format('Y-m-s')]);
+
+
     }
 
     public function perfilIndex()
@@ -286,9 +307,9 @@ class UsuarioController extends Controller
             'pages/jquery.validation.init.js',
             'plugins/parsleyjs/parsley.min.js',
             'js/metismenu.min.js',
-            'plugins/dropify/js/dropify.min.js',
-            'pages/jquery.form-upload.init.js',
-            'js/js_general.js',
+            // 'js/bootstrap.bundle.min.js',
+            // 'plugins/dropify/js/dropify.min.js',
+            // 'pages/jquery.form-upload.init.js',
             'js/js_perfil.js',
         );
         $page_data['header_css'] = array(
@@ -308,64 +329,60 @@ class UsuarioController extends Controller
         $USUARIO = session('user');
         $DATA['usuario'] = $USUARIO;
         // dd($DATA);
-        if (!empty($USUARIO->USU_TIPO_PERSONA) === "2") {
+        if ($USUARIO->USU_TIPO_PERSONA === "2") {
             $REPRESENTANTE = Usuario::where('ID_REPRESENTANTE', $USUARIO->USU_ID)->first();
             // dd($REPRESENTANTE);
             $DATA['representante'] = $REPRESENTANTE;
             // dd($DATA);
+            // $DATA['representante'] = session('USUARIO_REPRESENTANTE');
         }
-
         return response()->json($DATA);
     }
     public function actualizarPerfil(Request $request)
     {
-        // dd($request->all());
         $user = session('user');
-        if(session('user')->USU_TIPO_PERSONA == '2'){ // presona juridica
+        if (session('user')->USU_TIPO_PERSONA == '2') { // presona juridica
             $user = Usuario::where('ID_REPRESENTANTE', session('user')->USU_ID)->first();
         }
-        
-        if ($user) {
-            // Actualiza los campos solo si existen en la solicitud
-            // $user->P_TIPO_PERSONA = $request->input('P_TIPO_PERSONA', $user->P_TIPO_PERSONA);
-            // $user->P_RUC = $request->input('P_RUC', $user->P_RUC);
-            // $user->P_DIRECCION_EMPRESA = $request->input('P_DIRECCION_EMPRESA', $user->P_DIRECCION_EMPRESA);
+        try {
+            if ($user) {
+                $user->USU_RAZON_SOCIAL = $request->input('P_APELLIDO_PARTERNO') . " " . $request->input('P_APELLIDO_MATERNO') . " " . $request->input('P_NOMBRES');
+                $user->USU_TIPO_DOCUMENTO = $request->input('P_TIPO_DOCUMENTO');
+                $user->USU_NUMERO_DOCUMENTO = $request->input('P_NRO_DOCUMENTO');
+                $user->USU_APE_PATERNO = $request->input('P_APELLIDO_PARTERNO');
+                $user->USU_APE_MATERNO = $request->input('P_APELLIDO_MATERNO');
+                $user->USU_NOMBRES = $request->input('P_NOMBRES');
+                $user->USU_DIRECCION = $request->input('P_DIRECCION_PERSONA');
+                $user->USU_DEPARTAMENTO = $request->input('P_DEPARTAMENTO');
+                $user->USU_PROVINCIA = $request->input('P_PROVINCIA');
+                $user->USU_DISTRITO = $request->input('P_DISTRITO');
+                $user->USU_NU_CELULAR = $request->input('P_CELULAR');
+                $user->USU_CORREO = $request->input('P_CORREO');
+                $user->USU_SEXO = $request->input('P_GENERO');
+                $user->USU_FEC_NACE = $request->input('P_FECHA_NACIMIENTO');
 
-            
-            $user->USU_RAZON_SOCIAL =   $request->input('P_APELLIDO_PARTERNO'). " ". $request->input('P_APELLIDO_MATERNO') . " ".  $request->input('P_NOMBRES');
-            $user->USU_TIPO_DOCUMENTO = $request->input('P_TIPO_DOCUMENTO');
-            $user->USU_NUMERO_DOCUMENTO = $request->input('P_NRO_DOCUMENTO');
-            $user->USU_APE_PATERNO = $request->input('P_APELLIDO_PARTERNO');
-            $user->USU_APE_MATERNO = $request->input('P_APELLIDO_MATERNO');
-            $user->USU_NOMBRES = $request->input('P_NOMBRES');
-            $user->USU_DIRECCION = $request->input('P_DIRECCION_PERSONA');
-            $user->USU_DEPARTAMENTO = $request->input('P_DEPARTAMENTO');
-            $user->USU_PROVINCIA = $request->input('P_PROVINCIA');
-            $user->USU_DISTRITO = $request->input('P_DISTRITO');
-            $user->USU_NU_CELULAR = $request->input('P_CELULAR');
-            $user->USU_CORREO = $request->input('P_CORREO');
+                // $imagen = $request->file('P_IMAGEN');
+                // dd($request);
+                // if ($request->hasFile('P_IMAGEN')) {
+                //     $url = 'images_ciudadanos/'. session('user')->USE_NUMERO_DOCUMENTO;
+                //     $PATH = $url.'/'.$imagen->getClientOriginalName();
+                //     $imagen->store( $PATH);  
+                //     $user->IMAGEN = $PATH;
+                // }
+                
+                $user->save();
+                return response()->json(['tipo' => 'success', 'mensaje' => 'Los datos fueron actualizados con exito']);
+            }
 
-            $user->USU_SEXO = $request->input('P_GENERO');
-            $user->USU_FEC_NACE = $request->input('P_FECHA_NACIMIENTO');
-
-            // if ($request->hasFile('imagen')) {
-            //     $path = $request->file('imagen')->store('public/imagenes');  
-            //     $user->imagen = $path;
-            // }
-
-            $user->save();
-            return response()->json(['tipo' => 'success', 'mensaje' => 'Los datos fueron actualizados con exito']);
-
+        } catch (\Throwable $th) {
+            // return response()->json(['tipo' => 'error', 'mensaje' => $th->getMessage()]);
+            return response()->json(['tipo' => 'error', 'mensaje' => 'Ocurrio un problema intentalo otra vez']);
         }
-
-        return response()->json(['tipo' => 'error', 'mensaje' => 'Ocurrio un problema, intentalo mas tarde']);
     }
 
     public function logout()
     {
-        // Invalida la sesión actual
         session()->invalidate();
-        // Limpiar la sesión actual y regenerar el token
         session()->regenerate();
         return redirect('/')
             ->with('success', 'Has cerrado sesión exitosamente.')
@@ -376,10 +393,21 @@ class UsuarioController extends Controller
             ]);
     }
 
-    public function cambiarClave(Request $request  ){
-        dd($request);
+    public function cambiarClave(Request $request)
+    {
+        // dd($request);
+        $CLAVE_ACTUAL = $request->input('P_CLAVE_ACTUAL');
+        $CLAVE_NUEVA = $request->input('P_CLAVE_NUEVA');
+
+        $USUARIO = Usuario::where('USU_ID', session('user')->USU_ID)->first();
+
+        if (Hash::check($CLAVE_ACTUAL, session('user')->USU_CLAVE)) {
+            $USUARIO->USU_CLAVE = Hash::make($CLAVE_NUEVA);
+            $USUARIO->save();
+            return response()->json(['tipo' => 'success', 'mensaje' => 'Los datos fueron actualizados con exito']);
+        }
+        return response()->json(['tipo' => 'error', 'mensaje' => 'La contraseña actual no es el correcto']);
     }
 
 }
-
 

@@ -21,12 +21,11 @@ class TramiteController extends Controller
     // public function __construct()
     // {        
         
-    //     $P_ANIO_EXPEDIENTE = now()->format('Y');
-    //     dd($P_ANIO_EXPEDIENTE);
-    //     $tipoDocumento = TipoDocumento::all(); 
+    //     $ROL_USUARIO = Rol::where('ROLCODIGO',session(('user')->ID_ROLES))->first();
+    //     session(['ROL_USER' => $ROL_USUARIO ]);
     //     try {
     //         $estados = Estado::all();   
-    //         dd($estados);   
+    //         dd(session(['ROL_USER' => $ROL_USUARIO ]));   
     //     } catch (\Exception $e) {
     //         dd(['error', $e->getMessage()]); 
     //     }
@@ -81,6 +80,7 @@ class TramiteController extends Controller
         $SOLICITUDES = DB::select('EXEC MDSJL.MOSTRAR_SOLICITUDES ?', [$USUARIO]);
         // dd($SOLICITUDES);
         return response()->json($SOLICITUDES);
+        
     }
     public function tupa()
     {
@@ -262,7 +262,7 @@ class TramiteController extends Controller
             }
 
             // dd($ANEXOS_DATA);
-            $mensaje = ['tipo' => 'success', 'mensaje' => 'Se registro la solicitud exitosamente'];
+            $mensaje = ['tipo' => 'success', 'mensaje' => 'Se registró la solicitud exitosamente'];
             // $mensaje = ['success', 'Se registro la solicitud exitosamente'];
 
             return $mensaje;

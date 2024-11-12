@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MainController;
+use App\Http\Controllers\Mpv\ObservadoController;
 use App\Http\Controllers\Mpv\TramiteController;
 use App\Http\Controllers\Sgd\UbigeoController;
 use App\Http\Controllers\Usuario\UsuarioController;
@@ -56,5 +57,11 @@ Route::middleware(['session.check'])->group(function () {
         Route::get('/solicitud/tipoDocumento', [TramiteController::class, 'tipoDocumento'])->name('solicitud.tipoDocumento');
         Route::get('/solicitud/estadoDocumento', [TramiteController::class, 'estadoDocumento'])->name('solicitud.estadoDocumento');
         Route::post('/solicitud/registrar', [TramiteController::class,'registrarSolicitud'])->name('tramite.solicitud.registrar');
+
+    });
+
+    Route::prefix('observado')->group(function () {
+        Route::get('/observado', [ObservadoController::class, 'Observados'])->name('docObservados');
+
     });
 });

@@ -1,10 +1,11 @@
-<h3 class="card-title text-white">Actualizar perfil</h3>
 <div class="container">
-    <form action=""  class="form-parsley">
-        <div class="row border-mjl">
-            <div class="col-md-7">
-                <div class="card">
-                    <div class="card-header bg-info">
+    <h3 class="card-title ">Actualizar perfil</h3>
+
+    <div class="row border-mjl">
+        <div class="col-md-7">
+            <div class="card">
+                <form action="" class="form-parsley" method="POST">
+                    <div class="card-header bg-secondary">
                         <h4 class="card-title text-white">Datos principales</h4>
                     </div>
                     <div class="card-body">
@@ -54,9 +55,8 @@
                                 <div class="form-group mb-2 ">
                                     <label class="form-label"> Tipo de Documento </label>
                                     <select name="P_TIPO_DOCUMENTO" class="form-select" id="P_TIPO_DOCUMENTO"
-                                        onchange="tipoDocumento();">
-                                        <option value="1" selected="">Documento Nacional de
-                                            Identidad </option>
+                                        onchange="tipoDocumento(event);">
+                                        <option value="1" selected="">Documento Nacional de Identidad </option>
                                         <option value="2">Carné de Extranjería</option>
                                         <option value="3">Pasaporte</option>
 
@@ -68,7 +68,7 @@
                                     <label class="form-label" for="P_NRO_DOCUMENTO">Número de
                                         Documento</label>
                                     <input type="text" class="form-control" name="P_NRO_DOCUMENTO"
-                                        id="P_NRO_DOCUMENTO" placeholder="Ingrese el numero" maxlength="12"
+                                        id="P_NRO_DOCUMENTO" placeholder="Ingrese el numero" maxlength="8"
                                         oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
                                 </div>
                             </div>
@@ -143,7 +143,7 @@
                                     <label class="form-label" for="P_CELULAR">Celular</label>
                                     <input type="text" maxlength="9" minlength="9" class="form-control"
                                         name="P_CELULAR" id="P_CELULAR" placeholder="celular"
-                                        oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                                 </div>
                             </div>
                         </div>
@@ -165,111 +165,120 @@
                         <button type="button" name="cancelar" id="cancelar" class="btn btn-secondary">
                             Cancelar</button>
                     </div>
+                </form>
+            </div>
+
+
+        </div>
+        <div class="col-md-4 ">
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-center dastone-profile-main">
+                        <div class="dastone-profile-main-pic">
+                            <img src="{{ asset('assets/images/users/user-8.jpg') }}" alt="" height="110"
+                            id="profileImage" 
+                                class="rounded-circle  w-50 h-auto">
+                            <span class="dastone-profile_main-pic-change text-end "
+                            onclick="document.getElementById('profileInput').click()" 
+                            > <i class="fas fa-camera"></i></span>
+                        </div>
+                        <div class="">
+                            <h5 class="mb-0">{{ session('user')->USU_CORREO }}</h5> 
+                            <small class="text-muted">{{ session('ROL_USER')->ROL_NOMBRE }}</small>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4 ">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="text-center dastone-profile-main">
-                            <div class="dastone-profile-main-pic">
-                                <img src="{{ asset('assets/images/users/user-8.jpg') }}" alt=""
-                                    height="110" class="rounded-circle">
-                                <span class="dastone-profile_main-pic-change "> <i class="fas fa-camera"></i></span>
-                            </div>
-                            <div class="">
-                                <h5 class="mb-0">{{ session('user')->USU_CORREO }}</h5>
-                                <small class="text-muted">ADMINISTRADOR</small>
-                            </div>
-                        </div>
-                    </div><!--end card-body-->
-                </div><!--end card-->
-
-                <div class="card">
-                    <div class="card-header bg-secondary">
-                        <h4 class="card-title text-white">Datos adicionales</h4>
+            <div class="card">
+                <div class="card-header bg-secondary">
+                    <h4 class="card-title text-white">Datos adicionales</h4>
+                </div>
+                <div class="card-body">
+                    <div class="form-group mb-4">
+                        <label class="form-label">Genero</label>
+                        <select name="P_GENERO" class="form-select" id="P_GENERO">
+                            <option value="1">Masculino</option>
+                            <option value="2">Femenino</option>
+                        </select>
                     </div>
-                    <div class="card-body">
-                        <div class="form-group mb-4">
-                            <label class="form-label">Genero</label>
-                            <select name="P_GENERO" class="form-select" id="P_GENERO">
-                                <option value="1">Masculino</option>
-                                <option value="2">Femenino</option>
-                            </select>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="form-group mt-2">
-                                <label class="form-label" for="P_FECHA_NACIMIENTO">Fecha de Nacimiento</label>
-                                <input type="date" class="form-control border border-info"
-                                    name="P_FECHA_NACIMIENTO" id="P_FECHA_NACIMIENTO">
-                            </div>
+                    <div class="col-md-12">
+                        <div class="form-group mt-2">
+                            <label class="form-label" for="P_FECHA_NACIMIENTO">Fecha de Nacimiento</label>
+                            <input type="date" class="form-control border border-info" name="P_FECHA_NACIMIENTO"
+                                id="P_FECHA_NACIMIENTO">
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="text-center dastone-profile-main">
+                        <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
+                            onclick="limpiarModal();" data-bs-target="#actualizarClave">
+                            <i data-feather="key"
+                                class="align-self-center icon-xs icon-dual me-1 text-danger "></i>Actualizar
+                            Contraseña</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                <div class="card">
-                    <div class="card-body">
-                        <div class="text-center dastone-profile-main">
-                            {{-- <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#actualizarClave">Launch demo modal</button> --}}
-                            <button type="button" class="btn btn-outline-info" data-bs-toggle="modal"
-                                data-bs-target="#actualizarClave">
-                                <i data-feather="key"
-                                    class="align-self-center icon-xs icon-dual me-1 text-danger "></i>Actualizar
-                                Contraseña</button>
-                        </div>
-                    </div><!--end card-body-->
-                </div><!--end card-->
-                <div class="modal fade" id="actualizarClave" tabindex="-1" role="dialog"
-                    aria-labelledby="actualizarClaveTitle" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content">
-                            <form class="form-parsley" action="{{ route('cambiarClave') }}" method="POST">
-                                @csrf
-                                <div class="modal-header">
-                                    <h6 class="modal-title m-0" id="actualizarClaveTitle">Actualizar Clave</h6>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div> 
-                                <div class="modal-body mx-5 my-2">
-                                    <div class="row">
-                                        <div class="form-group mb-2 ">
-                                            <h6>Clave Actual</h6>
-                                            <input type="password" id="P_CLAVE_ACTUAL" name="P_CLAVE_ACTUAL"
-                                                class="form-control" placeholder="Ingrese contraseña actual "
-                                                required autocomplete="off" />
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group mb-2 ">
-                                                <label class="form-label" for="P_CLAVE_NUEVA">Nueva contraseña</label>
-                                                <input type="password" id="P_CLAVE_NUEVA" name="P_CLAVE_NUEVA"
-                                                    class="form-control" placeholder="Ingrese la Contraseña"
-                                                    autocomplete="off"  required />
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group mb-2">
-                                                <label class="form-label">Confirmar contraseña nueva</label>
-                                                <input type="password" id="P_CONFIRMACION_CLAVE" required
-                                                    name="P_CONFIRMACION_CLAVE" class="form-control" 
-                                                    data-parsley-equalto="#P_CLAVE_NUEVA"
-                                                    placeholder="Confirmar Contraseña" 
-                                                    autocomplete="off"  />
 
-                                            </div>
-                                        </div>
+    <div class="modal fade" id="actualizarClave" tabindex="-1" role="dialog"
+        aria-labelledby="actualizarClaveTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <form class="form-parsley" action="{{ route('cambiarClave') }}" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h6 class="modal-title m-0" id="actualizarClaveTitle">Actualizar Clave</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body mx-5 my-2">
+                        <div class="row">
+                            <div class="form-group mb-2 ">
+                                <h6>Clave Actual</h6>
+                                <input type="password" id="P_CLAVE_ACTUAL" name="P_CLAVE_ACTUAL" 
+                                    class="form-control" placeholder="Ingrese contraseña actual " required
+                                    autocomplete="off" />
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group mb-2 ">
+                                    <label class="form-label" for="P_CLAVE_NUEVA">Nueva contraseña</label>
+                                    <input type="password" id="P_CLAVE_NUEVA" name="P_CLAVE_NUEVA"
+                                        class="form-control" placeholder="Ingrese la Contraseña" autocomplete="off"
+                                        onkeypress="" required />
+                                </div>
+
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group mb-2">
+                                    <label class="form-label">Confirmar contraseña nueva</label>
+                                    <input type="password" id="P_CONFIRMACION_CLAVE" required
+                                        name="P_CONFIRMACION_CLAVE" class="form-control"
+                                        data-parsley-equalto="#P_CLAVE_NUEVA" placeholder="Confirmar Contraseña"
+                                        autocomplete="off" />
+                                    <div class="invalid-feedback">
+                                        <span class="text-danger">¡Las contraseñas no coinciden!</span>
                                     </div>
+
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-soft-primary btn-sm" 
-                                    onclick="actuaizarClave();"
-                                    >Guardar cambio</button>
-                                    <button type="button" class="btn btn-soft-secondary btn-sm"
-                                        data-bs-dismiss="modal"> Cerrar</button>
-                                </div>
-                            </form>
+
+                            </div>
                         </div>
                     </div>
-                </div>
-
+                    <div class="modal-footer ">
+                        <button type="button" class="btn btn-soft-primary btn-sm" id="guardarClave"
+                            onclick="actuaizarClave();">Guardar cambio</button>
+                        <button type="button" class="btn btn-soft-secondary btn-sm" data-bs-dismiss="modal">
+                            Cerrar</button>
+                    </div>
+                </form>
             </div>
-    </form>
-</div>
+        </div>
+    </div>
+
+    <input type="file" id="profileInput" style="display: none;" accept="image/*" onchange="previewProfileImage(event)">
+

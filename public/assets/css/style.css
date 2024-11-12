@@ -8,3 +8,36 @@
 .border-mjl{
     border-bottom: 2px solid #12a4ed !important;
 }
+
+.truncate-text {
+    max-width: 150px; /* Ajusta el ancho máximo de la columna */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+
+
+.badge {
+    padding: 8px 12px;
+    font-weight: 500;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.table-responsive {
+    min-height: 400px;
+}
+
+
+
+
+

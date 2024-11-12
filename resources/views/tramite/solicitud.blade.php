@@ -49,76 +49,73 @@
 
         <div class="card">
             {{-- <form  id="formFiltro"> --}}
-                <div class="card-header mb-2">
-                    <div class="card-title fs-5 mb-2">Busqueda</div>
-                    {{-- FILTRO --}}
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group mt-2 ">
-                                <div class="form-group">
-                                    <label class="form-label" for="FILTRO_EXPEDIENTE">Número de Solicitud /
-                                        Expediente</label>
-                                    <input type="text" class="form-control border border-info"
-                                        name="FILTRO_EXPEDIENTE" id="FILTRO_EXPEDIENTE"
-                                        placeholder="Ingrese el numero del expediente">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group mt-2 ">
-                                <label class="form-label">Tipo Expediente</label>
-                                <select name="FILTRO_TIPO_EXPEDIENTE" class="form-select border border-info"
-                                    id="FILTRO_TIPO_EXPEDIENTE">
-                                    <option value="0" selected="">--Seleccione---</option>
-                                    <option value="1">TUPA</option>
-                                    <option value="2">SOLICITUD</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group mt-2 ">
-                                <label class="form-label">Estado del documento</label>
-                                <select name="FILTRO_ESTADO" class="form-select border border-info" id="FILTRO_ESTADO">
-                                    {{-- <option value="0" selected="">Todos</option> --}}
-
-                                </select>
-
-
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group mt-2">
-                                <label class="form-label" for="FILTRO_FECHA_INICIO">Desde</label>
-                                <input type="date" class="form-control border border-info" name="FILTRO_FECHA_INICIO"
-                                    id="FILTRO_FECHA_INICIO" placeholder="Ingrese el numero del expediente">
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="form-group mt-2">
-                                <label class="form-label" for="FILTRO_FECHA_FIN">Hasta</label>
-                                <input type="date" class="form-control border border-info" name="FILTRO_FECHA_FIN"
-                                    id="FILTRO_FECHA_FIN" placeholder="Ingrese el numero del expediente">
+            <div class="card-header mb-2">
+                <div class="card-title fs-5 mb-2">Busqueda</div>
+                {{-- FILTRO --}}
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group mt-2 ">
+                            <div class="form-group">
+                                <label class="form-label" for="FILTRO_EXPEDIENTE">Número de Solicitud /
+                                    Expediente</label>
+                                <input type="text" class="form-control border border-info" name="FILTRO_EXPEDIENTE"
+                                    id="FILTRO_EXPEDIENTE" placeholder="Ingrese el numero del expediente">
                             </div>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-end gap-3">
-                        <button type="button" class="btn btn-danger" onclick="aplicarFiltro();">BUSCAR</button>
-                        <button type="button" class="btn btn-secondary" onclick="solicitudes();">LIMPIAR</button>
-                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#registrarNuevo"
-                            {{-- onclick="abrirModal()" id="abrirRegistroModal" --}}>REGISTRAR NUEVO</button>
+                    <div class="col-md-2">
+                        <div class="form-group mt-2 ">
+                            <label class="form-label">Tipo Expediente</label>
+                            <select name="FILTRO_TIPO_EXPEDIENTE" class="form-select border border-info"
+                                id="FILTRO_TIPO_EXPEDIENTE">
+                                <option value="0" selected="">--Seleccione---</option>
+                                <option value="1">TUPA</option>
+                                <option value="2">SOLICITUD</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mt-2 ">
+                            <label class="form-label">Estado del documento</label>
+                            <select name="FILTRO_ESTADO" class="form-select border border-info" id="FILTRO_ESTADO">
+                                {{-- <option value="0" selected="">Todos</option> --}}
+
+                            </select>
+
+
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mt-2">
+                            <label class="form-label" for="FILTRO_FECHA_INICIO">Desde</label>
+                            <input type="date" class="form-control border border-info" name="FILTRO_FECHA_INICIO"
+                                id="FILTRO_FECHA_INICIO" placeholder="Ingrese el numero del expediente">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group mt-2">
+                            <label class="form-label" for="FILTRO_FECHA_FIN">Hasta</label>
+                            <input type="date" class="form-control border border-info" name="FILTRO_FECHA_FIN"
+                                id="FILTRO_FECHA_FIN" placeholder="Ingrese el numero del expediente">
+                        </div>
                     </div>
                 </div>
+                <div class="d-flex justify-content-end gap-3">
+                    <button type="button" class="btn btn-danger" onclick="aplicarFiltro();">BUSCAR</button>
+                    <button type="button" class="btn btn-secondary" onclick="solicitudes();">LIMPIAR</button>
+                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#registrarNuevo"
+                        {{-- onclick="abrirModal()" id="abrirRegistroModal" --}}>REGISTRAR NUEVO</button>
+                </div>
+            </div>
             {{-- </form> --}}
             <div class="card-body text-size-20">
-                <table id="row_callback"  
-                class="table table-striped table-bordered dt-responsive nowrap" 
-                style="border-collapse: collapse; border-spacing: 0; border-color:black;  width: 100%; ">
-                <thead class="secondary">
-                        <tr class="btn-secondary text-white"> 
+                <table id="row_callback" class="table table-striped table-bordered dt-responsive nowrap"
+                    style="border-collapse: collapse; border-spacing: 0; border-color:black;  width: 100%; ">
+                    <thead class="secondary">
+                        <tr class="btn-secondary text-white">
                             <th><strong>SOLICITUD</strong></th>
                             <th><strong>FECHA DE PRESENTACION</strong></th>
                             <th><strong>NUMERO DE EXPEDIENTE</strong></th>
-                            <th><strong>FECHA EMITIDO</strong></th>
                             <th><strong>ASUNTO</strong></th>
                             <th><strong>OBSERVACIONES</strong></th>
                             <th><strong>ANEXOS</strong></th>
@@ -128,14 +125,13 @@
                         </tr>
                     </thead>
                     <tbody id="DATA_SOLICITUD">
-                         
-                    </tbody>
 
+                    </tbody>
                 </table>
             </div>
         </div>
-    </div> <!-- end col -->
-</div> <!-- end row -->
+    </div>
+</div>
 
 {{-- MODAL DE REGISTRO --}}
 <div class="modal fade" id="registrarNuevo" tabindex="-1" role="dialog" aria-labelledby="registrarNuevo"
@@ -209,9 +205,8 @@
                                 </div>
                                 <div class="col-md-5">
                                     <input type="text" class="form-control border" name="P_NRO_DOCUMENTO"
-                                        id="P_NRO_DOCUMENTO" placeholder="Numero de documento" 
-                                         oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                                        required>
+                                        id="P_NRO_DOCUMENTO" placeholder="Numero de documento"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
                                 </div>
                             </div>
                         </div>
@@ -220,9 +215,8 @@
                             <div class="form-group d-flex justify-content-star aling-item-center">
                                 <div class="col-md-6 ">
                                     <input type="text" class="form-control border" name="P_NRO_FOLIOS"
-                                        id="P_NRO_FOLIOS" placeholder="Ingrese el numero de folios" 
-                                         oninput="this.value = this.value.replace(/[^0-9]/g, '');"
-                                        required>
+                                        id="P_NRO_FOLIOS" placeholder="Ingrese el numero de folios"
+                                        oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
                                 </div>
                                 {{-- <div class="col-md-2">
                                     <div class="justify-content-center aling-item-center">

@@ -26,30 +26,8 @@ $('#registrarNuevo').on('shown.bs.modal', function () {
         dropdownParent: $("#registrarNuevo")
     });
     getTipoDocumento();
-    
+
 });
-
-// function abrirModal() {
-//     $('.repeater-default').repeater({
-//         showFirstItem: false,
-//         initEmpty: true,
-//         defaultValues: {
-//             'text-input': ''
-//         },
-//         show: function () {
-//             $(this).slideDown();
-//         },
-//         hide: function (deleteElement) {
-//             $(this).slideUp(deleteElement);
-//         }
-//     });
-// }
-
-// window.onclick = function(event) {
-//     if (event.target == document.getElementById("registrarNuevo")) {
-//         limpiarModal();
-//     }
-// }
 
 $('#registrarNuevo').on('hidden.bs.modal', limpiarModal);
 
@@ -124,7 +102,7 @@ function getEstadoDocumento() {
     let url = 'tramite/solicitud/estadoDocumento';
     fetchGet(url, function (result) {
         console.log(result);
-        llenarCombo(result, 'FILTRO_ESTADO', 'ESTA_DESCRIPCION', 'ESTA_ID',0);
+        llenarCombo(result, 'FILTRO_ESTADO', 'ESTA_DESCRIPCION', 'ESTA_ID', 0);
     });
 }
 
@@ -227,22 +205,52 @@ function uploadAnexo(event, cant = 2) {
     console.log("Archivos seleccionados:", archivos);
 }
 
+// ==============================================================================================
+
 function solicitudes() {
     var url = 'tramite/solicitud/lista';
     fetchGet(url, function (result) {
         data = result;
         mostrarData(data);
     });
-    
-    $('#FILTRO_EXPEDIENTE').val(''); 
-    $('#FILTRO_TIPO_EXPEDIENTE').val('0'); 
+
+    $('#FILTRO_EXPEDIENTE').val('');
+    $('#FILTRO_TIPO_EXPEDIENTE').val('0');
 
     $('#FILTRO_ESTADO').val('0').trigger('change');
     $('#FILTRO_FECHA_INICIO').val('');
     $('#FILTRO_FECHA_FIN').val('');
-
 }
-// ==============================================================================================
+
+// function limitarPalabras(texto, limite = 10) {
+//     const palabras = texto.split(' ');
+//     if (palabras.length > limite) {
+//         return palabras.slice(0, limite).join(' ') + '...';
+//     }
+//     return texto;
+// }
+
+// function limitarCaracteres(texto, limite = 50) {
+//     if (texto.length > limite) {
+//         return texto.substring(0, limite) + '...';
+//     }
+//     return texto;
+// }
+
+// function limitarPalabras(texto, limite = 10) {
+//     const palabras = texto.split(' ');
+//     if (palabras.length > limite) {
+//         return `<span title="${texto}">${palabras.slice(0, limite).join(' ')}...</span>`;
+//     }
+//     return texto;
+// }
+
+function reducir(data) {
+    if(data){
+        return data.length > 50 ? `${data.substring(0, 50)}...` : data
+    }
+    return '';
+}
 
 function mostrarData(data) {
     const BOTONES = `
@@ -262,29 +270,45 @@ function mostrarData(data) {
             { data: 'SOLI_NU_EMI' },
             { data: 'SOLI_FECHA' },
             { data: 'SOLI_NRO_EXPEDIENTE' },
-            { data: 'SOLI_FECHA_EMISION' },
-            { data: 'SOLI_ASUNTO' },
-            { data: 'SOLI_OBSERVACION' },
-            { data: 'CANTIDAD_ANEXO' },
             {
-                data: null,  // Especificamos `null` ya que estamos renderizando manualmente
-                render: function (data, type, row) {
-                    // Toma directamente la clase de `SOLI_ESTADO_COLOR`
-                    return `<span class="${row.ESTA_COLOR}">${row.ESTA_DESCRIPCION}</span>`;
-                }
+                data: 'SOLI_ASUNTO',
+                render: (data) => data.length > 50 ? `${data.substring(0, 50)}...` : data
             },
             {
-                data: null,  // Especificamos `null` ya que estamos renderizando manualmente
+                data: 'SOLI_OBSERVACION',
+                // render: (data) => data.length > 50 ? `${data.substring(0, 50)}...` : data
+            },
+            { data: 'CANTIDAD_ANEXO' },
+            {
+                data: null,
+                // render: function (data, type, row) { 
+                //     return `<span class="${row.ESTA_COLOR}">${row.ESTA_DESCRIPCION}</span>`;
+                // }
+                render: (data) => `<span class="badge ${data.ESTA_COLOR}">${data.ESTA_DESCRIPCION}</span>`
+
+            },
+            {
+                data: null,
                 render: function () {
                     return BOTONES;
                 }
             }
         ],
         responsive: true,
-        destroy: true  // Esto permite recargar la tabla sin duplicados
+        destroy: true
+        // dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+        //     '<"row"<"col-sm-12"tr>>' +
+        //     '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        // buttons: [
+        //     'copy', 'excel', 'pdf'
+        // ]
     });
-    
 }
+
+
+
+
+
 function aplicarFiltro() {
     const url = 'tramite/solicitud/filtro';
 
