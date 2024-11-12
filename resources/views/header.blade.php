@@ -24,7 +24,7 @@
             <div class="dropdown-menu dropdown-menu-end">
                 <a class="dropdown-item" href="{{route('perfil')}}"><i data-feather="user" class="align-self-center icon-xs icon-dual me-1">
                     </i> Perfil</a>
-                {{-- <a class="dropdown-item" href="apps-contact-list.html"><i data-feather="users" class="align-self-center icon-xs icon-dual me-1"></i> Contacts</a> --}}
+                {{-- <a class="dropdown-item" href="{{route('cambiarClave')}}"><i data-feather="key" class="align-self-center icon-xs icon-dual me-1"></i> Cambiar clave</a> --}}
 
                 <div class="dropdown-divider mb-0"></div>
                 <a class="dropdown-item" href="{{route('logout')}}"><i data-feather="power" class="align-self-center icon-xs icon-dual me-1"></i> Salir</a>

@@ -1,39 +1,3 @@
-
-// document.getElementById("P_TIPO_PERSONA").addEventListener("change", function () {
-//     var rucField = document.getElementById("GROUP-RUC");
-//     var razField = document.getElementById("GROUP-RA_ZO");
-//     var direcField = document.getElementById("GROUP-DIREC_EM");
-//     var GrupoPerJuField = document.getElementById("GRUPO-PER-JURIDICA");
-
-//     var rucIn = document.getElementById("P_RUC");
-//     var razIn = document.getElementById("P_RAZON_SOCIAL");
-//     var direIn = document.getElementById("P_DIRECCION_EMPRESA");
-
-//     if (!rucField || !razField || !direcField) {
-//         console.error("Uno o más campos no existen en el DOM");
-//         return;
-//     }
-//     if (this.value === "2") {
-//         rucField.style.display = "block";
-//         razField.style.display = "block";
-//         direcField.style.display = "block";
-//         GrupoPerJuField.style.display = "block";
-//         rucIn.required = true;
-//         razIn.required = true;
-//         direIn.required = true;
-
-//     } else {
-//         rucField.style.display = "none";
-//         razField.style.display = "none";
-//         direcField.style.display = "none";
-//         GrupoPerJuField.style.display = "none";
-//         rucIn.required = false;
-//         razIn.required = false;
-//         direIn.required = false;
-//     }
-// });
-
-
 $(document).ready(function () {
     var ok =''
     ok = usuarioLogeado();
@@ -90,25 +54,6 @@ function tipoDocumento() {
     }
 }
 
-
-// document.getElementById("P_TIPO_PERSONA").dispatchEvent(new Event("change"));
-// document.getElementById("P_TIPO_DOCUMENTO").addEventListener("change", function () {
-//     var nuroField = document.getElementById("P_NRO_DOCUMENTO");
-//     nuroField.value = ''
-//     if (this.value === "1") {  
-//         nuroField.maxLength = 8; 
-//     } else if (this.value === "2") { 
-//         nuroField.maxLength = 12;
-//     } else if (this.value === "3") { 
-//         nuroField.maxLength = 8;
-//     } else {
-//         nuroField.maxLength = "";  
-//     }
-// });
-// document.getElementById("P_TIPO_DOCUMENTO").dispatchEvent(new Event("change"));
-
-
-
 function usuarioLogeado() {
     let url = 'usuario/usuarioRepresentante';
     var usuario;
@@ -125,8 +70,7 @@ function usuarioLogeado() {
     return ok;
 }
 
-function actualizarVista(usuario, representante = '') {
-    // console.log(usuario, representante);
+function actualizarVista(usuario, representante = '') { 
     var usuarioActualizar;
     if (representante != '') { // persona juridica
         usuarioActualizar = representante;
@@ -191,8 +135,8 @@ function departamentos(departamentoUsuario) {
     fetchGet(url, function (result) {
         llenarCombo(result, 'P_DEPARTAMENTO', 'NODEP', 'UBDEP', '', departamentoUsuario);
     });
-
 }
+
 function provincia(event) {
     var departamento = event.target.value;
     console.log(departamento);
@@ -261,9 +205,6 @@ function actualizarDatos() {
         P_GENERO: document.getElementById("P_GENERO") ? document.getElementById("P_GENERO").value : null,
         P_FECHA_NACIMIENTO: document.getElementById("P_FECHA_NACIMIENTO") ? document.getElementById("P_FECHA_NACIMIENTO").value : null
     };
-
-
-
     let url = 'usuario/actualizarUsuario';
     showMessageConfirm('', '¿Estas seguro de hacer los cambios? ', function (si) {
         if (si.isConfirmed) {
@@ -271,28 +212,31 @@ function actualizarDatos() {
                 showMessageSweetRegister(result['tipo'], result['mensaje']);
             });
         }
-
     })
-
-
-
-
-
-
-
-
-    // showMessageSweetRegister('error', 'noers')
-
-    // showMessageSweet('error', 'noers', 'con 3 parametros')
-
-
-
-
-
-
-
-
 }
 
+function actuaizarClave() {
+    console.log("entro");
+    
+    let P_CLAVE_ACTUAL =  document.getElementById("P_CLAVE_ACTUAL").value;
+    let P_CLAVE_NUEVA = document.getElementById("P_CLAVE_NUEVA").value;
+    let P_CONFIRMACION_CLAVE = document.getElementById("P_CONFIRMACION_CLAVE").value;
+
+    if (P_CLAVE_NUEVA != P_CONFIRMACION_CLAVE) {
+        showMessageSweetRegister('warning', 'la confirmacion debeser igual a al clave nueva');
+        return;
+    }
+
+    let data = {
+        P_CLAVE_ACTUAL: document.getElementById("P_CLAVE_ACTUAL").value,
+        P_CLAVE_NUEVA: document.getElementById("P_CLAVE_NUEVA").value,
+        P_CONFIRMACION_CLAVE: document.getElementById("P_CONFIRMACION_CLAVE").value,
+    }
+    let url = 'usuario/cambiarClave';
+    fetchPost(url,data, function (result) {
+        console.log(result);
+        
+    })
+}
 
 

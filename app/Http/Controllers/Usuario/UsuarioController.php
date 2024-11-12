@@ -283,13 +283,13 @@ class UsuarioController extends Controller
 
         $page_data['header_js'] = array(
             'js/jquery.min.js',
-            'js/js_general.js',
-            'js/js_perfil.js',
-            'plugins/dropify/js/dropify.min.js',
-            'pages/jquery.form-upload.init.js',
             'pages/jquery.validation.init.js',
             'plugins/parsleyjs/parsley.min.js',
-            'js/metismenu.min.js'
+            'js/metismenu.min.js',
+            'plugins/dropify/js/dropify.min.js',
+            'pages/jquery.form-upload.init.js',
+            'js/js_general.js',
+            'js/js_perfil.js',
         );
         $page_data['header_css'] = array(
             'plugins/dropify/css/dropify.min.css',
@@ -308,7 +308,7 @@ class UsuarioController extends Controller
         $USUARIO = session('user');
         $DATA['usuario'] = $USUARIO;
         // dd($DATA);
-        if ($USUARIO->USU_TIPO_PERSONA === "2") {
+        if (!empty($USUARIO->USU_TIPO_PERSONA) === "2") {
             $REPRESENTANTE = Usuario::where('ID_REPRESENTANTE', $USUARIO->USU_ID)->first();
             // dd($REPRESENTANTE);
             $DATA['representante'] = $REPRESENTANTE;
@@ -375,8 +375,11 @@ class UsuarioController extends Controller
                 'Expires' => 'Sat, 01 Jan 2000 00:00:00 GMT',
             ]);
     }
-}
 
- 
+    public function cambiarClave(Request $request  ){
+        dd($request);
+    }
+
+}
 
 

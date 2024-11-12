@@ -252,7 +252,7 @@
                                                     <div class="form-group mb-2 ">
                                                         <label class="form-label" for="P_CLAVE">Contraseña</label>
                                                         <input type="password" id="P_CLAVE" name="P_CLAVE"
-                                                            class="form-control" placeholder="Correo Contraseña"
+                                                            class="form-control" placeholder="Ingrese la Contraseña"
                                                             required />
                                                         {{-- pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$" --}}
                                                     </div>

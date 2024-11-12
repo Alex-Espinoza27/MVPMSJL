@@ -41,10 +41,10 @@ Route::middleware(['session.check'])->group(function () {
         // perfil / modificar
         Route::get('/perfil', [UsuarioController::class, 'perfilIndex'])->name('perfil');
         Route::get('/logout', [UsuarioController::class, 'logout'])->name('logout');
+        Route::post('/cambiarClave', [UsuarioController::class, 'cambiarClave'])->name('cambiarClave');
+
         Route::get('/usuarioRepresentante', [UsuarioController::class, 'usuarioRepresentante'])->name('usuario');
         Route::post('/actualizarUsuario', [UsuarioController::class, 'actualizarPerfil'])->name('actualizarUsuario');
-
-
     });
 
     Route::prefix('tramite')->group(function () {
@@ -55,7 +55,6 @@ Route::middleware(['session.check'])->group(function () {
         Route::get('/solicitud/tupa', [TramiteController::class, 'tupa'])->name('solicitud.tupa');
         Route::get('/solicitud/tipoDocumento', [TramiteController::class, 'tipoDocumento'])->name('solicitud.tipoDocumento');
         Route::get('/solicitud/estadoDocumento', [TramiteController::class, 'estadoDocumento'])->name('solicitud.estadoDocumento');
-
         Route::post('/solicitud/registrar', [TramiteController::class,'registrarSolicitud'])->name('tramite.solicitud.registrar');
     });
 });
