@@ -57,11 +57,12 @@ Route::middleware(['session.check'])->group(function () {
         Route::get('/solicitud/tipoDocumento', [TramiteController::class, 'tipoDocumento'])->name('solicitud.tipoDocumento');
         Route::get('/solicitud/estadoDocumento', [TramiteController::class, 'estadoDocumento'])->name('solicitud.estadoDocumento');
         Route::post('/solicitud/registrar', [TramiteController::class,'registrarSolicitud'])->name('tramite.solicitud.registrar');
-
+        
+        Route::get('/solicitud/{solicitudID}', [TramiteController::class, 'solictudID'])->name('solicitud.solicitudID');
     });
-
+    
     Route::prefix('observado')->group(function () {
         Route::get('/observado', [ObservadoController::class, 'Observados'])->name('docObservados');
-
+        Route::get('/lista', [ObservadoController::class, 'listarObservados'])->name('oservados.lista');
     });
 });

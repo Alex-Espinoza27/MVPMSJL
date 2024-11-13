@@ -5,12 +5,7 @@
                 <div class="page-title-box">
                     <div class="row">
                         <div class="col">
-                            <h4 class="page-title">SOLICITUD</h4>
-                            <div class="breadcrumb d-flex gap-2">
-                                <h5><a href="#">Inicio /</a></h5>
-                                <h5><a href="#">Solicitud /</a></h5>
-                                <h5><a href="#">Lista</a></h5>
-                            </div>
+                            <h4 class="page-title">Documentos Observados</h4>
                         </div>
                     </div>
                 </div>
@@ -85,7 +80,7 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="datatable" class="table table-bordered dt-responsive nowrap" style="width:100%">
-                            <thead>
+                            <thead class="bg-info text-white">
                                 <tr>
                                     <th>SOLICITUD</th>
                                     <th>FECHA</th>

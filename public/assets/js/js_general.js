@@ -231,7 +231,7 @@ function fetchGet(url, callback, loading = true) {
             callback(res)
         }).catch(err => {
             $("body").removeClass("loader");
-            console.log(err);
+            console.log(err,url);
         }) 
 }
 

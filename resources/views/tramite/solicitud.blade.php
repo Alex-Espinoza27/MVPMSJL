@@ -26,8 +26,6 @@
 
 
 
-
-
 <div class="row">
     <div class="col-12">
         <div class="row">
@@ -35,12 +33,7 @@
                 <div class="page-title-box">
                     <div class="row">
                         <div class="col">
-                            <h4 class="page-title">SOLICITUD</h4>
-                            <div class="breadcrumb d-flex gap-2">
-                                <h5><a href="#">Inicio /</a></h5>
-                                <h5><a href="#">Solicitud /</a></h5>
-                                <h5><a href="#">Lista</a></h5>
-                            </div>
+                            <h4 class="page-title">REGISTRO DE DOCUMENTOS</h4>
                         </div>
                     </div>
                 </div>
@@ -218,18 +211,6 @@
                                         id="P_NRO_FOLIOS" placeholder="Ingrese el numero de folios"
                                         oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
                                 </div>
-                                {{-- <div class="col-md-2">
-                                    <div class="justify-content-center aling-item-center">
-                                        <i data-feather="minus"></i>
-                                    </div>
-                                </div>
-                                <div class="col-md-5">
-                                    <select name="P_ANIO_EXPEDIENTE" class="form-select " id="P_ANIO_EXPEDIENTE"
-                                        required>
-                                        <option value="2024">2024</option>
-                                        <option value="2023">2023</option>
-                                    </select>
-                                </div> --}}
                             </div>
                         </div>
 
@@ -325,6 +306,176 @@
                 </div>
             </form>
 
+        </div>
+    </div>
+</div>
+
+
+{{-- MODAL PARA VER DATOS DE LA SOLICITUD --}}
+
+<div class="modal fade bd-example-modal-xl " id="verDetalleSolicitud" tabindex="-1" role="dialog"
+    aria-labelledby="verDetalleSolicitudLabel" aria-hidden="true">
+    <div class="modal-dialog  modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title m-0" id="verDetalleSolicitudLabel">DETALLE DE LA SOLICITUD</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div><!--end modal-header-->
+            <div class="row  m-3">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header bg-secondary">
+                            <h4 class="card-title text-white">Datos de la Solicitud</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                                    <label class="text-end">Numero de solicitud: </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" id="M_NRO_SOLICITUD" class="form-control" name="NRO_SOLICITUD"  disabled />
+                                </div>
+                            </div>
+        
+                            <div class="row mb-2">
+                                <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                                    <label class="text-end">Fecha de presentación: </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" id="M_FECHA_PRESENTACION" class="form-control"   disabled />
+                                </div>
+                            </div>
+        
+                            <div class="row mb-2">
+                                <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                                    <label class="text-end">Asunto: </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <textarea name="" id="M_ASUNTO" cols="100" rows="2"  class="form-control" disabled></textarea>
+                                </div>
+                            </div>
+        
+                            <div class="row mb-2">
+                                <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                                    <label class="text-end">Expediente: </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" id="M_EXPEDIENTE" class="form-control"    disabled />
+                                </div>
+                            </div>
+        
+                            <div class="row mb-2">
+                                <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                                    <label class="text-end">Observaciones: </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="text" id="M_OBSERBACION" class="form-control"  disabled />
+                                </div>
+                            </div>
+        
+                            <div class="row mb-2">
+                                <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                                    <label class="text-end">Estado: </label>
+                                </div>
+                                <div class="col-md-8" id="M_ESTADO">
+                                    {{-- <input type="text" id="M_ESTADO" class="form-control"  disabled /> --}}
+                                </div>
+                            </div>
+        
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-secondary">
+                            <h4 class="card-title text-white">Archivos</h4>
+                        </div>
+                        <div class="card-body">
+                            
+                            <div class="row mb-2">
+                                <label class="" id="ARCHIVOPRINCIPAL"><strong>Archivo principal: </strong></label>
+                                 
+                                <div class="dropdown-divider mb-0"></div>
+                                <label class="" id="ANEXOS"><strong>Anexos: </strong></label>
+                                 
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mx-5">
+                <div class="card-header bg-secondary">
+                    <h4 class="card-title text-white">Datos de la persona</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                            <label class="text-end">Tipo de Persona: </label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="M_TIPO_PERSONA" class="form-control"  disabled />
+                        </div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                            <label class="text-end">Tipo Documento: </label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="M_TIPO_DOCUMENTO" class="form-control"  disabled />
+                        </div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                            <label class="text-end">Razon social: </label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="M_RAZON_SOCIAL" class="form-control"  disabled />
+                        </div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                            <label class="text-end">Correo Electrónico: </label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="M_CORREO" class="form-control"  disabled />
+                        </div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                            <label class="text-end">Número de Teléfono: </label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="M_CELULAR" class="form-control"  disabled />
+                        </div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                            <label class="text-end">Domicilio: </label>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" id="M_DIRECCION" class="form-control"  disabled />
+                        </div>
+                    </div>
+
+                    <div class="row mb-2">
+                        <div class="col-md-4 d-flex align-items-center justify-content-end ">
+                            <label class="text-end">Género: </label>
+                        </div>
+                        <div class="col-md-6" id="M_GENERO">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-soft-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
         </div>
     </div>
 </div>

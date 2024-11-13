@@ -8,6 +8,7 @@ use App\Http\Controllers\Mpv\Models\ArchivoPrincipal;
 use App\Http\Controllers\Mpv\Models\Estado;
 use App\Http\Controllers\Mpv\Models\Solicitud;
 use App\Http\Controllers\Mpv\Models\TipoDocumento;
+use App\Http\Controllers\Seguridad\Models\Usuario;
 use App\Http\Controllers\Sgd\Models\Tupa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,11 +22,10 @@ class TramiteController extends Controller
     // public function __construct()
     // {        
         
-    //     $ROL_USUARIO = Rol::where('ROLCODIGO',session(('user')->ID_ROLES))->first();
-    //     session(['ROL_USER' => $ROL_USUARIO ]);
+         
     //     try {
-    //         $estados = Estado::all();   
-    //         dd(session(['ROL_USER' => $ROL_USUARIO ]));   
+    //         $estados = Estado::all();  
+    //         dd($estados); 
     //     } catch (\Exception $e) {
     //         dd(['error', $e->getMessage()]); 
     //     }
@@ -82,6 +82,30 @@ class TramiteController extends Controller
         return response()->json($SOLICITUDES);
         
     }
+
+    public function solictudID($solicitudID){
+        // dd("ingreso", $solicitudID);
+        try {
+            $solicitud = Solicitud::Where('SOLI_ID',$solicitudID)->first();
+            $estado = Estado::where('ESTA_ID',$solicitud->SOLI_ESTADO_ID)->first();
+            $persona = Usuario::Where('USU_ID',$solicitud->COD_USUARIO )->first();
+            $archivoPrincipal = ArchivoPrincipal::Where('SOLICITUD_ID',$solicitud->SOLI_ID)->first();
+            $anexos = Anexo::Where('SOLICITUD_ID',$solicitud->SOLI_ID)->get();
+            
+            $data['solicitud'] = $solicitud;
+            $data['estado'] = $estado;
+            $data['solicitante'] = $persona;
+            $data['archivoPrincipal'] = $archivoPrincipal;
+            $data['anexos'] = $anexos;
+
+
+            return response()->json($data);
+        } catch (\Throwable $th) {
+             return response()->json(['error'=> 'Ocurrio un problema, no se encontro la solicitud o el estado']);
+        }
+    }
+
+
     public function tupa()
     {
         $tupa = Tupa::all();
@@ -169,7 +193,8 @@ class TramiteController extends Controller
                 return ['tipo' => 'error', 'mensaje' => 'Fakta' . $validator->errors()];
             }
 
-            $BASE_PATH_MPV = 'ArchivosMPV';
+            //sale  hasta la ruta http::/
+            $BASE_PATH_MPV = '../../storage/app/public/ArchivosMPV';
             $USUARIO = session('user')->USU_NUMERO_DOCUMENTO;
             $ARCHIVO_PRIN_FOLDER = 'archivo_principal';
             $ANEXOS_FOLDER = 'anexos';

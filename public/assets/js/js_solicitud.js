@@ -245,8 +245,9 @@ function solicitudes() {
 //     return texto;
 // }
 
+
 function reducir(data) {
-    if(data){
+    if (data) {
         return data.length > 50 ? `${data.substring(0, 50)}...` : data
     }
     return '';
@@ -254,14 +255,18 @@ function reducir(data) {
 
 function mostrarData(data) {
     const BOTONES = `
-            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>
-                <div class="dropdown-menu">
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-purple"><i class="fas fa-eye m-1"></i>VER DATOS </button>
-                        <button type="button" class="btn btn-info"><i class="fas fa-route m-1"></i>VER SEGUIMIENTO</button>
-                    </div>    
-                </div>
-            <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-trash"></i></button>
+        <div class="container">
+            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i
+                 class="fas fa-ellipsis-v"></i></button>
+            <div class="dropdown-menu">
+                <div class="d-flex flex-column align-items-center gap-2 ">
+                <button type="button" class="btn btn-purple w-100"><i class="fas fa-eye m-1"></i>VER DATOS </button>
+                <button type="button" class="btn btn-info" w-10><i class="fas fa-route m-1"></i>VER SEGUIMIENTO</button>
+            </div>
+            </div>
+            <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i
+                class="fas fa-trash"></i></button>
+        </div>
             `;
 
     $('#row_callback').DataTable({
@@ -275,7 +280,7 @@ function mostrarData(data) {
                 render: (data) => data.length > 50 ? `${data.substring(0, 50)}...` : data
             },
             {
-                data: 'SOLI_OBSERVACION',
+                data: 'SOLI_OBSERVACION'
                 // render: (data) => data.length > 50 ? `${data.substring(0, 50)}...` : data
             },
             { data: 'CANTIDAD_ANEXO' },
@@ -289,8 +294,21 @@ function mostrarData(data) {
             },
             {
                 data: null,
-                render: function () {
-                    return BOTONES;
+                render: function (data) {
+                    return `
+                        <div class="container">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i
+                                 class="fas fa-ellipsis-v"></i></button>
+                            <div class="dropdown-menu">
+                                <div class="d-flex flex-column align-items-center gap-2 ">
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#verDetalleSolicitud" class="btn btn-purple w-100" onclick="obtenerDatosRegistro(${data.SOLI_ID});" ><i class="fas fa-eye m-1"></i>VER DATOS </button>
+                                <button type="button" data-bs-toggle="modal" data-bs-target="#verDetalleSolicitud" class="btn btn-info w-10"   onclick="mostrarSeguimientoRegistro(${data.SOLI_ID});"><i class="fas fa-route m-1"></i>VER SEGUIMIENTO</button>
+                            </div>
+                            </div>
+                            <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i
+                                class="fas fa-trash"></i></button>
+                        </div>
+                        `;
                 }
             }
         ],
@@ -305,8 +323,65 @@ function mostrarData(data) {
     });
 }
 
+function obtenerDatosRegistro(soli_id){
+    console.log("paramtro", soli_id);
+    
+    let url = 'tramite/solicitud/' + soli_id;
+    fetchGet(url, function(result){
+        if (result['error']) {
+            showMessageSweetRegister('error',result['error'] )
+        }
+        mostrarDataSolicitud(result);
+    })
+
+}
+
+function mostrarDataSolicitud(data){
+    console.log(data);
+
+    // mostrar la data de la solicitud
+    setValue('M_NRO_SOLICITUD',data['solicitud'].SOLI_NU_EMI);
+    setValue('M_FECHA_PRESENTACION',data['solicitud'].SOLI_FECHA);
+    setValue('M_ASUNTO',data['solicitud'].SOLI_ASUNTO);
+    setValue('M_EXPEDIENTE',data['solicitud'].SOLI_NRO_EXPEDIENTE);
+
+    setValue('M_OBSERBACION',data['solicitud'].SOLI_OBSERVACION);
+
+    var estado = document.getElementById('M_ESTADO')
+    var genero = document.getElementById('M_GENERO')
+    estado.innerHTML += `<span class="badge ${data['estado'].ESTA_COLOR}">${data['estado'].ESTA_DESCRIPCION}</span>`
+    
+    tipPersona = (data['solicitante'].USU_TIPO_PERSONA =='1') ? 'PERSONA NATURAL': 'PERSONA JURIDICA';
+    tipodocumento = (data['solicitante'].USU_TIPO_DOCUMENTO =='1') ? 'DNI': (data['solicitante'].USU_TIPO_DOCUMENTO =='2') ? 'CARNET DE EXTRANJERÍA': (data['solicitante'].USU_TIPO_DOCUMENTO =='3') ? 'PASAPORTE': 'NO TIENE';
+    icono = (data['solicitante'].USU_TIPO_PERSONA =='2') ? 'JURIDICA <i class="fab fa-odnoklassniki"></i>' : (data['solicitante'].USU_SEXO =='1') ? ' MASCULINO <i class="fas fa-male"></i>' : 'FEMENINO<i class="fas fa-female"></i> ';
+    genero.innerHTML += icono;
+
+    setValue('M_TIPO_PERSONA',tipPersona );
+    setValue('M_TIPO_DOCUMENTO',tipodocumento );
+    setValue('M_RAZON_SOCIAL',data['solicitante'].USU_RAZON_SOCIAL );
+    setValue('M_CORREO',data['solicitante'].USU_CORREO );
+    setValue('M_CELULAR',data['solicitante'].USU_NU_CELULAR );
+    setValue('M_DIRECCION',data['solicitante'].USU_DIRECCION );
+    
+    // archivos
+    var archivoPrincipal = document.getElementById('ARCHIVOPRINCIPAL')
+    archivoPrincipal.innerHTML += 
+    `<a href="${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE_ORIGEN}"  target="_blank">${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE}</a>`
+
+    //anexo
+    var anexos = document.getElementById('ANEXOS');
+    if(data['anexos']){
+        data['anexos'].forEach(anexo => {
+            anexos.innerHTML += `<a href="${anexo.ANEX_NOMBRE_FILE_ORIGEN}" target="_blank" >${anexo.ANEX_NOMBRE_FILE}</a>`;
+        });
+    }
+
+}
 
 
+function mostrarSeguimientoRegistro(soli_id){
+
+}
 
 
 function aplicarFiltro() {

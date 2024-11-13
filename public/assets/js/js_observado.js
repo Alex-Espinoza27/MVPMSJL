@@ -1,28 +1,33 @@
-$(function () {
-    $('[data-toggle="tooltip"]').tooltip({
-        container: 'body',
-        html: true
-    });
-});
+// $(function () {
+//     $('[data-toggle="tooltip"]').tooltip({
+//         container: 'body',
+//         html: true
+//     });
+// });
 
 $(document).ready(function () {
-    observados() 
+    observados()
 });
 
 
 function observados() {
-    var url = 'tramite/solicitud/lista';
+    var url = 'observado/lista';
     fetchGet(url, function (result) {
         data = result;
         mostrarData(data);
     });
-    
-    $('#FILTRO_EXPEDIENTE').val(''); 
-    $('#FILTRO_TIPO_EXPEDIENTE').val('0'); 
 
+    $('#FILTRO_EXPEDIENTE').val('');
+    $('#FILTRO_TIPO_EXPEDIENTE').val('0');
     $('#FILTRO_ESTADO').val('0').trigger('change');
     $('#FILTRO_FECHA_INICIO').val('');
     $('#FILTRO_FECHA_FIN').val('');
+}
+function reducir(data) {
+    if(data){
+        return data.length > 50 ? `${data.substring(0, 50)}...` : data
+    }
+    return '';
 }
 
 function mostrarData(data) {
@@ -37,95 +42,105 @@ function mostrarData(data) {
             <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-trash"></i></button>
             `;
 
-    $('#row_callback').DataTable({
+    $('#datatable').DataTable({
         data: data,
         columns: [
             { data: 'SOLI_NU_EMI' },
             { data: 'SOLI_FECHA' },
-            { data: 'SOLI_NRO_EXPEDIENTE' }, 
-            { data: 'SOLI_ASUNTO' },
-            { data: 'SOLI_OBSERVACION' },
-            { data: 'CANTIDAD_ANEXO' },
+            { data: 'SOLI_NRO_EXPEDIENTE' },
             {
-                data: null, 
-                render: (data) => `<span class="badge ${data.ESTA_COLOR}">${data.ESTA_DESCRIPCION}</span>`
+                data: 'SOLI_ASUNTO',
+                render: (data) => data.length > 50 ? `${data.substring(0, 50)}...` : data
             },
             {
-                data: null, 
+                data: 'SOLI_OBSERVACION'
+                // render: (data) => data.length > 50 ? `${data.substring(0, 50)}...` : data
+            },
+            { data: 'CANTIDAD_ANEXO' },
+            {
+                data: null,
+                // render: function (data, type, row) { 
+                //     return `<span class="${row.ESTA_COLOR}">${row.ESTA_DESCRIPCION}</span>`;
+                // }
+                render: (data) => `<span class="badge ${data.ESTA_COLOR}">${data.ESTA_DESCRIPCION}</span>`
+
+            },
+            {
+                data: null,
                 render: function () {
                     return BOTONES;
                 }
             }
         ],
         responsive: true,
-        destroy: true  
+        destroy: true
     });
 }
+ 
 
 
 
-function mostrarData(data) {
-    $(document).ready(function () {
-        const table = $('#datatable').DataTable({
-            data: data,
-            columns: [
-                { data: 'SOLI_NU_EMI' },
-                { data: 'SOLI_FECHA' },
-                { data: 'SOLI_NRO_EXPEDIENTE' },
-                {
-                    data: 'SOLI_ASUNTO',
-                    render: (data) => data.length > 50 ? `${data.substring(0, 50)}...` : data
-                },
-                {
-                    data: 'SOLI_OBSERVACION',
-                    render: (data) => data.length > 30 ? `${data.substring(0, 30)}...` : data
-                },
-                { data: 'CANTIDAD_ANEXO' },
-                {
-                    data: null,
-                    render: (data) => `<span class="badge ${data.ESTA_COLOR}">${data.ESTA_DESCRIPCION}</span>`
-                },
-                {
-                    data: null,
-                    render: () => `
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-primary ver-datos">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-info ver-seguimiento">
-                            <i class="fas fa-route"></i>
-                        </button>
-                    </div>
-                `
-                }
-            ],
-            responsive: true,
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json'
-            },
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
-                '<"row"<"col-sm-12"tr>>' +
-                '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
-            buttons: [
-                'copy', 'excel', 'pdf'
-            ]
-        });
+// function mostrarData(data) {
+//     $(document).ready(function () {
+//         const table = $('#datatable').DataTable({
+//             data: data,
+//             columns: [
+//                 { data: 'SOLI_NU_EMI' },
+//                 { data: 'SOLI_FECHA' },
+//                 { data: 'SOLI_NRO_EXPEDIENTE' },
+//                 {
+//                     data: 'SOLI_ASUNTO',
+//                     render: (data) => data.length > 50 ? `${data.substring(0, 50)}...` : data
+//                 },
+//                 {
+//                     data: 'SOLI_OBSERVACION'
+//                     // render: (data) => data.length > 30 ? `${data.substring(0, 30)}...` : data
+//                 },
+//                 { data: 'CANTIDAD_ANEXO' },
+//                 {
+//                     data: null,
+//                     render: (data) => `<span class="badge ${data.ESTA_COLOR}">${data.ESTA_DESCRIPCION}</span>`
+//                 },
+//                 {
+//                     data: null,
+//                     render: () => `
+//                     <div class="d-flex gap-2">
+//                         <button class="btn btn-sm btn-primary ver-datos">
+//                             <i class="fas fa-eye"></i>
+//                         </button>
+//                         <button class="btn btn-sm btn-info ver-seguimiento">
+//                             <i class="fas fa-route"></i>
+//                         </button>
+//                     </div>
+//                 `
+//                 }
+//             ],
+//             responsive: true
+//             // language: {
+//             //     url: '//cdn.datatables.net/plug-ins/1.10.24/i18n/Spanish.json'
+//             // },
+//             // dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+//             //     '<"row"<"col-sm-12"tr>>' +
+//             //     '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+//             // buttons: [
+//             //     'copy', 'excel', 'pdf'
+//             // ]
+//         });
 
-        $('#datatable').on('click', '.ver-datos', function () {
-            const data = table.row($(this).closest('tr')).data();
+//         $('#datatable').on('click', '.ver-datos', function () {
+//             const data = table.row($(this).closest('tr')).data();
 
-        });
+//         });
 
-        $('#datatable').on('click', '.ver-seguimiento', function () {
-            const data = table.row($(this).closest('tr')).data();
+//         $('#datatable').on('click', '.ver-seguimiento', function () {
+//             const data = table.row($(this).closest('tr')).data();
 
-        });
-    });
-}
+//         });
+//     });
+// }
 
 
 // const tableConfig = {
-
 //     // Inicialización personalizada
 //     initComplete: function() {
 //         // Agregar filtros personalizados
