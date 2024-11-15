@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class ObservadoController extends Controller
 {
     
-    public function observados()
+    public function observadosIndex()
     { 
         $page_data['header_js'] = array(
             // select2 
@@ -20,7 +20,7 @@ class ObservadoController extends Controller
 
             // form validation 
             // 'pages/jquery.validation.init.js',
-            // 'plugins/parsleyjs/parsley.min.js',
+            'plugins/parsleyjs/parsley.min.js',
 
             //table
             'plugins/datatables/jquery.dataTables.min.js',

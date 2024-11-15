@@ -8,7 +8,7 @@ use Session;
 class MainController extends Controller
 {
     public function dashboard(){
-        #dd(Session::get('user'));
+        // dd(Session::get('user'));
 
         $page_data['header_js'] = array(
             'js/js_main.js'

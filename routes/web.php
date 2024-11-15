@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\MainController;
+use App\Http\Controllers\Mpv\AdmintrarSolicitud;
 use App\Http\Controllers\Mpv\ObservadoController;
 use App\Http\Controllers\Mpv\TramiteController;
 use App\Http\Controllers\Sgd\UbigeoController;
@@ -49,7 +50,7 @@ Route::middleware(['session.check'])->group(function () {
     });
 
     Route::prefix('tramite')->group(function () {
-        Route::get('/solicitud', [TramiteController::class, 'solicitud'])->name('solicitud');
+        Route::get('/solicitud', [TramiteController::class, 'solicitudIndex'])->name('solicitud');
         Route::get('/solicitud/lista', [TramiteController::class,'listarSolicitud'])->name('solicitud.lista');
         Route::post('/solicitud/filtro', [TramiteController::class,'filtrarSolicitud'])->name('solicitud.filtro');
 
@@ -62,7 +63,18 @@ Route::middleware(['session.check'])->group(function () {
     });
     
     Route::prefix('observado')->group(function () {
-        Route::get('/observado', [ObservadoController::class, 'Observados'])->name('docObservados');
+        Route::get('/observado', [ObservadoController::class, 'observadosIndex'])->name('docObservados');
         Route::get('/lista', [ObservadoController::class, 'listarObservados'])->name('oservados.lista');
     });
+
+    Route::prefix('administrarSolicitud')->group(function () {
+        Route::get('/administrar', [AdmintrarSolicitud::class, 'administrarIndex'])->name('administrar.solicitud');    
+        Route::post('/registrarObservacion', [AdmintrarSolicitud::class, 'registrarObservacion'])->name('administrar.registrar.Observacion');    
+    
+    
+    }); 
+
+
+
+
 });

@@ -45,18 +45,18 @@ function limpiarModal() {
     $('#P_ASUNTO').val('');
 
     var textoMaximo = document.getElementById('textoMaximo').value = '';
-    textoMaximo.value = ""
-    //  $('#textoMaximo').val('');
-    console.log(textoMaximo.value);
-    $("#P_ASUNTO").removeClass('invalid-feedback')
-    $("#P_ASUNTO").removeClass('is-invalid');
-    $("#textoMaximo").removeClass('invalid-feedback');
-    $("#textoMaximo").removeClass('valid-feedback');
+    textoMaximo.innerHTML = ''
 
-    document.getElementById('P_ARCHIVO_PRIN').file = null;
+    $("#P_ASUNTO").removeClass('is-valid');
+    $("#P_ASUNTO").removeClass('is-invalid');
+    $("#P_ASUNTO").removeClass('invalid-feedback');
+    $("#P_ASUNTO").removeClass('valid-feedback');
+
+    // var archivoPrinci = document.getElementById('P_ARCHIVO_PRIN');
+    // archivoPrinci.file = null;
+
     $('#P_ARCHIVO_PRIN').val('');
-    // $('.dropify').dropify('destroy');
-    // $('#P_ARCHIVO_PRIN').dropify();
+    setValue('P_ARCHIVO_PRIN','')
 
     // Limpiar los anexos generados por el repeater
     $('input[id^="P_ANEXOS[]"]').each(function () {
@@ -107,30 +107,7 @@ function getEstadoDocumento() {
 }
 
 
-function longitudTextAsunto(inputID, IDmessage) {
-    const mensaje = document.querySelector('#' + inputID);
-    const longitud = document.querySelector('#' + IDmessage);
-    let min = parseInt($("#" + inputID).attr("minlength"));
-    let max = parseInt($("#" + inputID).attr("maxlength"));
 
-    longitud.innerHTML = `Longitud: ${mensaje.value.length} - Mínimo ${min} / Máximo ${max}`;
-    const contarLongitud = () => {
-        longitud.innerHTML = `Longitud: ${mensaje.value.length} - Mínimo ${min} / Máximo ${max}`;
-    }
-    if (mensaje.value.length == max) {
-        return;
-    }
-    //console.log(mensaje.value.length,max);
-    if (mensaje.value.length < min) {
-        $("#" + inputID).addClass('is-invalid');
-        $("#" + IDmessage).addClass('invalid-feedback');
-    } else {
-        $("#" + inputID).removeClass('is-invalid');
-        $("#" + inputID).addClass('is-valid');
-        $("#" + IDmessage).removeClass('invalid-feedback');
-        $("#" + IDmessage).addClass('valid-feedback');
-    }
-}
 
 function uploadPrincipal(event, cant = 2) {
     const file = event.target.files[0];
@@ -159,8 +136,6 @@ function uploadAnexo(event, cant = 2) {
     var maxSizeTotal = (30) //* 1024 * 1024; -> MAXIMO DE 30 MBs
     var totalMB = 0;
 
-    // console.log("entro");
-
     if (file) {
         const fileSize = file.size;
         const maxSize = cant * 1024 * 1024;
@@ -175,6 +150,7 @@ function uploadAnexo(event, cant = 2) {
             'image/jpeg',
             'image/png'
         ];
+
         if (!TiposPermitidos.includes(file.type)) {
             showMessageSweet('error', 'Opss!', 'Solo están permitidos archivos PDF, DOCX, JPG, PNG');
             console.log("file:type: ", file.type);
@@ -205,13 +181,14 @@ function uploadAnexo(event, cant = 2) {
     console.log("Archivos seleccionados:", archivos);
 }
 
+
 // ==============================================================================================
 
 function solicitudes() {
     var url = 'tramite/solicitud/lista';
     fetchGet(url, function (result) {
         data = result;
-        mostrarData(data);
+        mostrarDatosTabla(data);
     });
 
     $('#FILTRO_EXPEDIENTE').val('');
@@ -253,21 +230,7 @@ function reducir(data) {
     return '';
 }
 
-function mostrarData(data) {
-    const BOTONES = `
-        <div class="container">
-            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i
-                 class="fas fa-ellipsis-v"></i></button>
-            <div class="dropdown-menu">
-                <div class="d-flex flex-column align-items-center gap-2 ">
-                <button type="button" class="btn btn-purple w-100"><i class="fas fa-eye m-1"></i>VER DATOS </button>
-                <button type="button" class="btn btn-info" w-10><i class="fas fa-route m-1"></i>VER SEGUIMIENTO</button>
-            </div>
-            </div>
-            <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i
-                class="fas fa-trash"></i></button>
-        </div>
-            `;
+function mostrarDatosTabla(data) {
 
     $('#row_callback').DataTable({
         data: data,
@@ -331,20 +294,38 @@ function obtenerDatosRegistro(soli_id){
         if (result['error']) {
             showMessageSweetRegister('error',result['error'] )
         }
+        limpiarDatosSolicitud();
         mostrarDataSolicitud(result);
     })
+}
 
+function limpiarDatosSolicitud(){
+    setValue('M_NRO_SOLICITUD','');
+    setValue('M_FECHA_PRESENTACION','');
+    setValue('M_ASUNTO','');
+    setValue('M_EXPEDIENTE','');
+    setValue('M_OBSERBACION',''); 
+    var estado = document.getElementById('M_ESTADO')
+    var genero = document.getElementById('M_GENERO')
+    var archivoPrincipal = document.getElementById('ARCHIVOPRINCIPAL')
+    var anexos = document.getElementById('ANEXOS');
+    estado.innerHTML = '';
+    genero.innerHTML = '';
+    archivoPrincipal.innerHTML = ''; 
+    anexos.innerHTML ='';
+    setValue('M_TIPO_PERSONA','' );
+    setValue('M_TIPO_DOCUMENTO','' );
+    setValue('M_RAZON_SOCIAL','' );
+    setValue('M_CORREO','' );
+    setValue('M_CELULAR','' );
+    setValue('M_DIRECCION','' );
 }
 
 function mostrarDataSolicitud(data){
-    console.log(data);
-
-    // mostrar la data de la solicitud
     setValue('M_NRO_SOLICITUD',data['solicitud'].SOLI_NU_EMI);
     setValue('M_FECHA_PRESENTACION',data['solicitud'].SOLI_FECHA);
     setValue('M_ASUNTO',data['solicitud'].SOLI_ASUNTO);
     setValue('M_EXPEDIENTE',data['solicitud'].SOLI_NRO_EXPEDIENTE);
-
     setValue('M_OBSERBACION',data['solicitud'].SOLI_OBSERVACION);
 
     var estado = document.getElementById('M_ESTADO')
@@ -365,28 +346,27 @@ function mostrarDataSolicitud(data){
     
     // archivos
     var archivoPrincipal = document.getElementById('ARCHIVOPRINCIPAL')
-    archivoPrincipal.innerHTML += 
-    `<a href="${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE_ORIGEN}"  target="_blank">${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE}</a>`
+    archivoPrincipal.innerHTML = ''; 
+    archivoPrincipal.innerHTML += `<li><a href="${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE_ORIGEN}"  target="_blank">${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE}</a></li>`
 
     //anexo
     var anexos = document.getElementById('ANEXOS');
     if(data['anexos']){
+        anexos.innerHTML += '<ul class="m-0">' 
         data['anexos'].forEach(anexo => {
-            anexos.innerHTML += `<a href="${anexo.ANEX_NOMBRE_FILE_ORIGEN}" target="_blank" >${anexo.ANEX_NOMBRE_FILE}</a>`;
+            anexos.innerHTML += `<li><a href="${anexo.ANEX_NOMBRE_FILE_ORIGEN}" target="_blank" >${anexo.ANEX_NOMBRE_FILE}</a></li>`;
         });
+         anexos.innerHTML += '</ul>'
     }
-
 }
 
-
 function mostrarSeguimientoRegistro(soli_id){
-
 }
 
 
 function aplicarFiltro() {
+    
     const url = 'tramite/solicitud/filtro';
-
     // Obtener los valores de los filtros 
     const filtroExpediente = document.getElementById('FILTRO_EXPEDIENTE').value;
     const filtroTipoExpediente = document.getElementById('FILTRO_TIPO_EXPEDIENTE').value;
@@ -413,7 +393,7 @@ function aplicarFiltro() {
         if (result.status == 'success') {
             // console.log("adentro",result.data);
             // return result.data;
-            mostrarData(result.data);
+            mostrarDataTabla(result.data);
         }
         else {
             showMessageSweet('warning', 'Ocurrio un problema', 'Al filtrar los datos ocurrio un problema, intentalo mas tarde')

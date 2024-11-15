@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Mpv;
 
-use App\Http\Controllers\Controller; 
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\Mpv\Models\Anexo;
 use App\Http\Controllers\Mpv\Models\ArchivoPrincipal;
 use App\Http\Controllers\Mpv\Models\Estado;
@@ -21,8 +21,8 @@ class TramiteController extends Controller
 {
     // public function __construct()
     // {        
-        
-         
+
+
     //     try {
     //         $estados = Estado::all();  
     //         dd($estados); 
@@ -31,12 +31,12 @@ class TramiteController extends Controller
     //     }
     // }
 
-    public function solicitud()
+    public function solicitudIndex()
     {
         // dd("entro");
         $page_data['header_js'] = array(
             // select2 
-            'js/js_general.js',
+            // 'js/js_general.js',
             'js/js_solicitud.js',
             //table
             'plugins/datatables/jquery.dataTables.min.js',
@@ -74,37 +74,37 @@ class TramiteController extends Controller
         // dd($SOLICITUDES);
         return view('index', $page_data, );
     }
+
     public function listarSolicitud()
     {
         $USUARIO = session('user')->USU_NUMERO_DOCUMENTO;
         $SOLICITUDES = DB::select('EXEC MDSJL.MOSTRAR_SOLICITUDES ?', [$USUARIO]);
         // dd($SOLICITUDES);
         return response()->json($SOLICITUDES);
-        
+
     }
 
-    public function solictudID($solicitudID){
+    public function solictudID($solicitudID)
+    {
         // dd("ingreso", $solicitudID);
         try {
-            $solicitud = Solicitud::Where('SOLI_ID',$solicitudID)->first();
-            $estado = Estado::where('ESTA_ID',$solicitud->SOLI_ESTADO_ID)->first();
-            $persona = Usuario::Where('USU_ID',$solicitud->COD_USUARIO )->first();
-            $archivoPrincipal = ArchivoPrincipal::Where('SOLICITUD_ID',$solicitud->SOLI_ID)->first();
-            $anexos = Anexo::Where('SOLICITUD_ID',$solicitud->SOLI_ID)->get();
-            
+            $solicitud = Solicitud::Where('SOLI_ID', $solicitudID)->first();
+            $estado = Estado::where('ESTA_ID', $solicitud->SOLI_ESTADO_ID)->first();
+            $persona = Usuario::Where('USU_ID', $solicitud->COD_USUARIO)->first();
+            $archivoPrincipal = ArchivoPrincipal::Where('SOLICITUD_ID', $solicitud->SOLI_ID)->first();
+            $anexos = Anexo::Where('SOLICITUD_ID', $solicitud->SOLI_ID)->get();
+
             $data['solicitud'] = $solicitud;
             $data['estado'] = $estado;
             $data['solicitante'] = $persona;
             $data['archivoPrincipal'] = $archivoPrincipal;
             $data['anexos'] = $anexos;
 
-
             return response()->json($data);
         } catch (\Throwable $th) {
-             return response()->json(['error'=> 'Ocurrio un problema, no se encontro la solicitud o el estado']);
+            return response()->json(['error' => 'Ocurrio un problema, no se encontro la solicitud o el estado']);
         }
     }
-
 
     public function tupa()
     {
@@ -118,7 +118,7 @@ class TramiteController extends Controller
     }
     public function estadoDocumento()
     {
-        $estados = Estado::all();  
+        $estados = Estado::all();
         return response()->json($estados);
     }
 
@@ -162,7 +162,7 @@ class TramiteController extends Controller
         $SOLICITUD->CREATED_BY = session('user')->USU_NUMERO_DOCUMENTO;
         $SOLICITUD->UPDATED_BY = session('user')->USU_NUMERO_DOCUMENTO;
         $SOLICITUD->COD_USUARIO = session('user')->USU_ID;
-        $SOLICITUD->SOLI_ESTADO_ID = 1; //Pendiente
+        $SOLICITUD->SOLI_ESTADO_ID = 1; //PRESENTADO
 
         try {
             $SOLICITUD->save();
@@ -174,6 +174,35 @@ class TramiteController extends Controller
         }
     }
 
+    public function guardarArchivosPlantilla($archivo, $usuario, $solicitudId, $carpeta)
+    {
+
+        $BASE_PATH_MPV = '../../storage/app/public/ArchivosMPV';
+        $USUARIO = $usuario;
+        $ARCHIVO_PRIN_FOLDER = $carpeta; //observado
+
+        // 3. Crear estructura de directorios
+        $USUARIO_PATH = "{$BASE_PATH_MPV}/{$USUARIO}/{$solicitudId}";
+        $ARCHIVO_PRINCIPAL_PATH = "{$USUARIO_PATH}/{$ARCHIVO_PRIN_FOLDER}";
+        $ARCHIVO_PRINCIPAL = $archivo;
+        $NOMBRE_ARCHIVOS_PRINCIPAL = $this->limpiarNombreArchivo($ARCHIVO_PRINCIPAL->getClientOriginalName());
+        
+        foreach ([$USUARIO_PATH, $ARCHIVO_PRINCIPAL_PATH] as $PATH) {
+            if (!Storage::exists($PATH)) {
+                Storage::makeDirectory($PATH);
+            }
+        }
+        try { 
+            $RUTA_ARCHIVO = Storage::putFileAs(
+                $ARCHIVO_PRINCIPAL_PATH,
+                $ARCHIVO_PRINCIPAL,
+                $NOMBRE_ARCHIVOS_PRINCIPAL
+            );
+            return $RUTA_ARCHIVO ;
+        } catch (\Throwable $th) {
+            return 'error';
+        }
+    }
     public function guardarArchivos(Request $request, $SOLICITUD_ID)
     {
         try {
@@ -183,17 +212,11 @@ class TramiteController extends Controller
             ]);
 
             if ($validator->fails()) {
-                // return response()->json([
-                //     'status' => false,
-                //     'message' => 'Error de validación',
-                //     'errors' => $validator->errors()
-                // ], 422);
-                // return ['error',$validator->errors()];
-                // return [ 'tipo' => 'error','mensaje' => $validator->errors()]; 
-                return ['tipo' => 'error', 'mensaje' => 'Fakta' . $validator->errors()];
+                return ['tipo' => 'error', 'mensaje' => 'Fatal' . $validator->errors()];
             }
 
             //sale  hasta la ruta http::/
+            // ../../storage/app/public/ArchivosMPV
             $BASE_PATH_MPV = '../../storage/app/public/ArchivosMPV';
             $USUARIO = session('user')->USU_NUMERO_DOCUMENTO;
             $ARCHIVO_PRIN_FOLDER = 'archivo_principal';
@@ -372,12 +395,12 @@ class TramiteController extends Controller
                 'data' => $RESULTADO
             ]);
 
-        } catch (\Exception $e) { 
+        } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Error al procesar la solicitud'
             ], 500);
         }
     }
-    
+
 }

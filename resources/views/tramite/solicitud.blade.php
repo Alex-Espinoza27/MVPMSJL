@@ -312,10 +312,9 @@
 
 
 {{-- MODAL PARA VER DATOS DE LA SOLICITUD --}}
-
 <div class="modal fade bd-example-modal-xl " id="verDetalleSolicitud" tabindex="-1" role="dialog"
     aria-labelledby="verDetalleSolicitudLabel" aria-hidden="true">
-    <div class="modal-dialog  modal-xl modal-dialog-centered" role="document">
+    <div class="modal-dialog  modal-xl modal-dialog-start" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h6 class="modal-title m-0" id="verDetalleSolicitudLabel">DETALLE DE LA SOLICITUD</h6>
@@ -391,21 +390,23 @@
                             <h4 class="card-title text-white">Archivos</h4>
                         </div>
                         <div class="card-body">
-                            
                             <div class="row mb-2">
-                                <label class="" id="ARCHIVOPRINCIPAL"><strong>Archivo principal: </strong></label>
-                                 
+                                <label><strong>Archivo principal:</strong></label>
+                                <div class="row" id="ARCHIVOPRINCIPAL">
+                                    {{-- arhivo principal --}}
+                                </div>
                                 <div class="dropdown-divider mb-0"></div>
-                                <label class="" id="ANEXOS"><strong>Anexos: </strong></label>
-                                 
-
+                                <label><strong class="text-25">Anexos:</strong></label>
+                                <div class="row" id="ANEXOS">
+                                    {{-- anexos --}}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card mx-5">
+            <div class="card mx-5 my-0">
                 <div class="card-header bg-secondary">
                     <h4 class="card-title text-white">Datos de la persona</h4>
                 </div>

@@ -294,18 +294,6 @@ function soloNumeros(idInput) {
     );
 }
 
-function buscarEnTabla(idInput, IdTabla) {
-    $(idInput).keyup(function () {
-        _this = this;
-        $.each($(IdTabla + " tbody tr"), function () {
-
-            if ($(this).text().toLowerCase().indexOf($(_this).val().toLowerCase()) === -1)
-                $(this).hide();
-            else
-                $(this).show();
-        });
-    });
-}
 function exportarExcel(idTabla) {
     window.open('data:application/vnd.ms-excel,' + encodeURIComponent($(idTabla).html()));
 }
@@ -447,10 +435,10 @@ function selectChecks(source, name = 'check-select') {
 function longitudText(inputID, IDmessage, max = 0, btnValida = '') {
     const mensaje = document.querySelector('#' + inputID);
     const longitud = document.querySelector('#' + IDmessage);
-    longitud.innerHTML = `Longitud: ${mensaje.value.length} / mÃ­nimo ${max}`;
+    longitud.innerHTML = `Longitud: ${mensaje.value.length} / Má­nimo ${max}`;
 
     const contarLongitud = () => {
-        longitud.innerHTML = `Longitud: ${mensaje.value.length} / mÃ­nimo ${max}`;
+        longitud.innerHTML = `Longitud: ${mensaje.value.length} / Má­nimo ${max}`;
     }
     if (max == 0) {
         max = parseInt($("#" + inputID).attr("maxlength"));
@@ -471,8 +459,8 @@ function longitudText(inputID, IDmessage, max = 0, btnValida = '') {
             $("#" + btnValida).removeClass('disabled');
         }
     }
-
 }
+
 function getCSRFToken() {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 }
@@ -637,3 +625,30 @@ function number_format(number, decimals, dec_point, thousands_sep) {
     }
     return s.join(dec);
 }
+// ----------------------------------------------------------------------
+
+function longitudTextAsunto(inputID, IDmessage) {
+    const mensaje = document.querySelector('#' + inputID);
+    const longitud = document.querySelector('#' + IDmessage);
+    let min = parseInt($("#" + inputID).attr("minlength"));
+    let max = parseInt($("#" + inputID).attr("maxlength"));
+
+    longitud.innerHTML = `Longitud: ${mensaje.value.length} - Mínimo ${min} / Máximo ${max}`;
+    const contarLongitud = () => {
+        longitud.innerHTML = `Longitud: ${mensaje.value.length} - Mínimo ${min} / Máximo ${max}`;
+    }
+    if (mensaje.value.length == max) {
+        return;
+    }
+    //console.log(mensaje.value.length,max);
+    if (mensaje.value.length < min) {
+        $("#" + inputID).addClass('is-invalid');
+        $("#" + IDmessage).addClass('invalid-feedback');
+    } else {
+        $("#" + inputID).removeClass('is-invalid');
+        $("#" + inputID).addClass('is-valid');
+        $("#" + IDmessage).removeClass('invalid-feedback');
+        $("#" + IDmessage).addClass('valid-feedback');
+    }
+}
+
