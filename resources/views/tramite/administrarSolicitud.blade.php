@@ -1,3 +1,18 @@
+
+@if (session('ok'))
+    <script> showMessageSweet('success', 'Registrado!',session('ok') )</script>
+@endif
+
+@if (session('success'))
+    <script> showMessageSweet('success', 'Registrado!',session('success') )</script>
+@endif
+
+@if (session('error'))
+    <script> showMessageSweet('error', 'Registrado!',session('error') )</script>
+@endif
+
+
+
 <div class="row">
     <div class="col-12">
         <div class="row">
@@ -69,6 +84,7 @@
                     style="border-collapse: collapse; border-spacing: 0; border-color:black;  width: 100%; ">
                     <thead class="secondary">
                         <tr class="btn-secondary text-white">
+                            <th><strong>#NRO</strong></th>
                             <th><strong>SOLICITUD</strong></th>
                             <th><strong>FECHA DE PRESENTACION</strong></th>
                             <th><strong>NUMERO DE EXPEDIENTE</strong></th>
@@ -260,56 +276,8 @@
     </div>
 </div>
 
+
 {{-- REGISTRAR OBSERVACION A LA SOLICITUD --}}
-{{-- <div class="modal fade bd-example-modal-xl " id="registrarObservacion" tabindex="-1" role="dialog"
-    aria-labelledby="registrarObservacionLabel" aria-hidden="true">
-    <div class="modal-dialog  modal-xl modal-dialog-start" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h6 class="modal-title m-0" id="registrarObservacionLabel">OBSERVAR DOCUMENTO</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            
-            <form action="" class="form-parsley" enctype="multipart/form-data">
-                @csrf
-                <div class="container m-5">
-                    <div class="row mb-3">
-                        <div class="col-md-10">
-                            <label class="card-title">Digite la Observacion:</label>
-                            <textarea  class="form-control border border-info" rows="5" id="P_OBSERVACION" name="P_OBSERVACION"
-                                placeholder="Escriba aquí.." required minlength="15" maxlength="200" ></textarea>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label class="card-title" for="P_FECHA_LIMITE_SUBSANACION">Fecha Límite de Subsanacíon:
-                            </label>
-                            <input type="date" class="border border-info form-control" 
-                                name="P_FECHA_LIMITE_SUBSANACION" id="P_FECHA_LIMITE_SUBSANACION" required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="row d-flex">
-                                <label class="card-title" for="P_ARCHIVO_OBSERVACION"> Agregar Documento <span
-                                        class="text-muted pb-3">(Opcional):</span></label>
-                            </div>
-                            <input type="file" class="form-control rounded" name="P_ARCHIVO_OBSERVACION"
-                                id="P_ARCHIVO_OBSERVACION" accept="application/pdf,image/png,image/jpeg,.doc,.docx"
-                                data-max-file-size="20" data-errors-position="outside" required>
-                        </div>
-                    </div>
-                </div>
-            </form>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-purple">VALIDAR OBSERVACION</button>
-                <button type="button" class="btn btn-outline-danger">REGISTRAR OBSERVACION</button>
-                <button type="button" class="btn btn-soft-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div> --}}
-
-
 <div class="modal fade bd-example-modal-lg" id="registrarObservacion" tabindex="-1" role="dialog"
     aria-labelledby="registrarObservacionLabel" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-lg modal-dialog-start" role="document">
@@ -319,8 +287,13 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form action="" class="form-parsley" enctype="multipart/form-data">
+            <form action="{{ route('administrar.registrar.Observacion') }}" class="form-parsley"
+                enctype="multipart/form-data" method="POST"   id="formObservacion">
                 @csrf
+                <input type="hidden" name="TIPO_REGISTRO_OBSERVACION" id="TIPO_REGISTRO_OBSERVACION">
+                {{-- <input type="hidden" name="TIPO_REGISTRO_OBSERVACION" id="TIPO_REGISTRO_OBSERVACION"> --}}
+
+                <input type="hidden" name="ID_SOLICITUD" id="ID_SOLICITUD">
                 <div class="container-fluid px-5 py-2">
                     <div class="row g-3">
                         <div class="col-12">
@@ -337,30 +310,27 @@
                             <label class="form-label" for="P_FECHA_LIMITE_SUBSANACION">
                                 Fecha Límite de Subsanacíon:
                             </label>
+                            <br>
                             <input type="date" class="form-control border border-info"
                                 name="P_FECHA_LIMITE_SUBSANACION" id="P_FECHA_LIMITE_SUBSANACION"
                                 onchange="esFechaMayorQueHoy('P_FECHA_LIMITE_SUBSANACION');">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" for="P_ARCHIVO_OBSERVACION">
-                                Agregar Documento  <span class="text-muted">(Opcional): El archivos debe ser menor a 20MB.</span>
+                            <label class="form-label" for="P_ARCHIVO_OBSERVACION">  
+                                Agregar Documento <span class="text-muted">(Opcional): El archivos debe ser menor a
+                                    20MB.</span>
                             </label>
                             <input type="file" class="form-control" name="P_ARCHIVO_OBSERVACION"
                                 id="P_ARCHIVO_OBSERVACION" accept="application/pdf,image/png,image/jpeg,.doc,.docx"
-                                 {{-- data-errors-position="outside"  data-max-file-size="10" --}}
-                                onchange="cargarArchivoGuia(event,20)" 
-                                >
-
-                            <input type="hidden"
-                                name="ID_SOLICITUD" id="ID_SOLICITUD">
+                                {{-- data-errors-position="outside"  data-max-file-size="10" --}} onchange="cargarArchivoGuia(event,20)">
                         </div>
                     </div>
+                    
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="btnValidarSolicitud" class="btn btn-purple"
-                        onclick="RegistrarValidacionSolicitud();">VALIDAR SOLICITUD</button>
+                    <button type="button" id="btnValidarSolicitud" class="btn btn-purple" onclick="actualizarTipoOperacion('1');">VALIDAR SOLICITUD</button>
                     <button type="button" id="btnRegistrarObservacion" class="btn btn-outline-danger"
-                        onclick="registrarObservacion();">REGISTRAR OBSERVACION</button>
+                        onclick="actualizarTipoOperacion('2');">ENVIAR OBSERVACION</button>
                     <button type="button" id="btnObservar" class="btn btn-soft-secondary btn-sm"
                         data-bs-dismiss="modal">Close</button>
                 </div>

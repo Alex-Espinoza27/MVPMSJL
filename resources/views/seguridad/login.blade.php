@@ -67,8 +67,7 @@
                                                     showConfirmButton: false,
                                                     timer: 2000,
                                                     timerProgressBar: true,
-                                                    didOpen: (toast) => {
-                                                        // toast.onmouseenter = Swal.stopTimer;
+                                                    didOpen: (toast) => { 
                                                         toast.onmouseleave = Swal.resumeTimer;
                                                     }
                                                 });

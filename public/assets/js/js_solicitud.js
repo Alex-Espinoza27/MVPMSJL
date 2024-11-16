@@ -106,9 +106,6 @@ function getEstadoDocumento() {
     });
 }
 
-
-
-
 function uploadPrincipal(event, cant = 2) {
     const file = event.target.files[0];
     if (file) {
@@ -347,14 +344,15 @@ function mostrarDataSolicitud(data){
     // archivos
     var archivoPrincipal = document.getElementById('ARCHIVOPRINCIPAL')
     archivoPrincipal.innerHTML = ''; 
-    archivoPrincipal.innerHTML += `<li><a href="${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE_ORIGEN}"  target="_blank">${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE}</a></li>`
+    const pathAdicional = '../../storage/app'
+    archivoPrincipal.innerHTML += `<li><a href="${pathAdicional+'/' + data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE_ORIGEN}"  target="_blank">${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE}</a></li>`
 
     //anexo
     var anexos = document.getElementById('ANEXOS');
     if(data['anexos']){
         anexos.innerHTML += '<ul class="m-0">' 
         data['anexos'].forEach(anexo => {
-            anexos.innerHTML += `<li><a href="${anexo.ANEX_NOMBRE_FILE_ORIGEN}" target="_blank" >${anexo.ANEX_NOMBRE_FILE}</a></li>`;
+            anexos.innerHTML += `<li><a href="${pathAdicional+'/' +anexo.ANEX_NOMBRE_FILE_ORIGEN}" target="_blank" >${anexo.ANEX_NOMBRE_FILE}</a></li>`;
         });
          anexos.innerHTML += '</ul>'
     }

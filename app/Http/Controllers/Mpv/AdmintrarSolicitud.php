@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Mpv\Models\HistorialSolicitud;
 use App\Http\Controllers\Mpv\Models\Solicitud;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Validator;
 class AdmintrarSolicitud extends Controller
 {
 
@@ -54,77 +54,81 @@ class AdmintrarSolicitud extends Controller
         return view('index', $page_data, );
     }
 
-    public function registrarObservacion(Request $request){
-        dd($request->all());
+    // Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException: The GET method is not supported 
+    // for route administrarSolicitud/registrarObservacion. Supported methods: POST. in file
+    // C:\laragon\www\MPVSJL\vendor\laravel\framework\src\Illuminate\Routing\AbstractRouteCollection.php on line 122
 
-        $validatedData = $request->validate([
+    public function registrarObservacion(Request $request){
+
+        $validator = Validator::make($request->all(), [
             'P_MENSAJE_OBSERVACION' => 'required|string|min:15|max:200',
-            'P_FECHA_LIMITE_SUBSANACION' => 'required|date|after:today', // Fecha debe ser posterior a hoy
+            'P_FECHA_LIMITE_SUBSANACION' => 'nullable|date|after:today',
             'P_ARCHIVO_OBSERVACION' => 'nullable|file|mimes:pdf,png,jpeg,doc,docx|max:20480', // Máximo 20 MB
+            'ID_SOLICITUD' => 'required|integer',
+            'TIPO_REGISTRO_OBSERVACION' => 'required|integer',
         ]);
-        if ($validatedData->fails()) {
-            return ['tipo' => 'error', 'mensaje' => 'Los datos no cumplen con las restricciones' ];
+
+
+        dd("paso", $request);
+        if ($validator->fails()) {
+            return response()->json([
+                'tipo' => 'error',
+                'mensaje' => $validator->errors()->first()
+                // 'mensaje' => 'Los datos no cumplen con las restricciones'
+            ]);
         }
 
-        
+    
         $HISTORIAL = new HistorialSolicitud();
-        $SOLICITUD = Solicitud::where('SOLI_ID',$request->input('ID_SOLICITUD') );
+        $SOLICITUD = Solicitud::where('SOLI_ID',$request->input('ID_SOLICITUD'))->first();
 
-        $HISTORIAL->HIS_NUMERO = maxNumeroHistorial($request->input('ID_SOLICITUD')); // nvarchar(191)   NULL,
-        $HISTORIAL->HIS_NU_ANN = now()->format('Y'); // nvarchar(10)   NULL,
-        $HISTORIAL->SOLICITUD_ID = $request->input('ID_SOLICITUD'); // bigint NOT NULL,
-        // $HISTORIAL->HIS_ASUNTO = 
-        $HISTORIAL->CREATED_AT = now()->format('Y-m-d'); // datetime2(0) NULL,
-        $HISTORIAL->CREATED_BY = session('user')->USU_ID;// int NULL,
-        $HISTORIAL->SOLI_OBSERVADO_BY = session('user')->USU_NUMERO_DOCUMENTO; // nvarchar(30)   NOT NULL,
-        $HISTORIAL->HIS_ESTADO = '3';// int NOT NULL,
-        $HISTORIAL->HIS_FECHA_OBSERVACION = now()->format('Y-m-d');  // datetime2(0) NULL,
+        $HISTORIAL->HIS_NUMERO = $this->maxNumeroHistorial($request->input('ID_SOLICITUD'));
+        $HISTORIAL->HIS_NU_ANN = now()->format('Y'); 
+        $HISTORIAL->SOLICITUD_ID = $request->input('ID_SOLICITUD');
+
+        $HISTORIAL->CREATED_AT = now()->format('Y-m-d');
+        $HISTORIAL->CREATED_BY = session('user')->USU_ID;
+        $HISTORIAL->SOLI_OBSERVADO_BY = session('user')->USU_NUMERO_DOCUMENTO; 
+        $HISTORIAL->HIS_ESTADO = '3';   
+        $HISTORIAL->HIS_FECHA_OBSERVACION = now()->format('Y-m-d');
         
-        $HISTORIAL->HIS_OBSERVACION = $request->input('P_MENSAJE_OBSERVACION');// nvarchar   NULL,
+        $HISTORIAL->HIS_OBSERVACION = $request->input('P_MENSAJE_OBSERVACION');
         $HISTORIAL->HIS_FECHA_OBSERVACION = now()->format('Y-m-d'); 
         if($request->input('P_FECHA_LIMITE_SUBSANACION')){
             $HISTORIAL->HIS_FECHA_LIMITE_SUBSANACION = $request->input('P_FECHA_LIMITE_SUBSANACION');
             $SOLICITUD->SOLI_FECHA_LIMITE_SUBSANACION = $request->input('P_FECHA_LIMITE_SUBSANACION');
         }
 
-
+        // dd($SOLICITUD);
         if($request->file('P_ARCHIVO_OBSERVACION')){
-            $HISTORIAL->HIS_FECHA_LIMITE_SUBSANACION = $request->file('P_FECHA_LIMITE_SUBSANACION');
             $model = new  TramiteController();
-            $ruta = $model->guardarArchivosPlantilla($request->file('P_FECHA_LIMITE_SUBSANACION'),$SOLICITUD->CREATED_BY,$request->input('ID_SOLICITUD'), 'observacion' );
+            $ruta = $model->guardarArchivosPlantilla($request->file('P_ARCHIVO_OBSERVACION'),$SOLICITUD->CREATED_BY,$request->input('ID_SOLICITUD'), 'observacion' );
             $HISTORIAL->HIS_FILE_OBSERVACION = ($ruta == 'error')? '': $ruta;
             $SOLICITUD->SOLI_FILE_OBSERVACION = ($ruta == 'error')? '': $ruta;
         }
 
         
-        $SOLICITUD->SOLI_FECHA_OBSERVACION =  now()->format('Y-m-d');;
+        $SOLICITUD->SOLI_FECHA_OBSERVACION =  now()->format('Y-m-d');
         $SOLICITUD->SOLI_OBSERVACION  = $request->input('P_MENSAJE_OBSERVACION');
+        // $SOLICITUD->SOLI_OBSERVACION  = 'Prueba de como hacer la reunion';
         $SOLICITUD->SOLI_OBSERVADO_BY  = session('user')->USU_NUMERO_DOCUMENTO; 
-        $SOLICITUD->SOLI_ESTADO_ID  = '3';
+        $SOLICITUD->SOLI_ESTADO_ID  = 3; //estado observado
 
+        // dd($HISTORIAL,$SOLICITUD);
         try {
             $HISTORIAL->save();
             $SOLICITUD->save();
-            // return response()->json(['success', 'Se registro exitosamente la observacion']);
-            return response()->json([
-                'tipo' => 'success',
-                'mensaje' => 'Se registro exitosamente la observacion'
-            ]);
+            return response()->json(['success', 'Se registro exitosamente la observacion']);
+            // return response()->json([ 'success' => 'success', 'mensaje' => 'Se registro exitosamente la observacion']);
 
         } catch (\Throwable $th) {
-            // return response()->json(['error', 'Ocurrio un problema intentalo otra vez']);
-            return response()->json([
-                'tipo' => 'error',
-                'mensaje' => 'Ocurrio un problema intentalo otra vez'
-            ]);
-
+            return response()->json(['error', 'Ocurrio un problema intentalo otra vez']);
+            // return response()->json([ 'tipo' => 'error', 'mensaje' => 'Ocurrio un problema intentalo otra vez'.$th->getMessage()]);
         }
-
-        
     }
     public function maxNumeroHistorial($solicitud_ID){
         $MAX = HistorialSolicitud::where('SOLICITUD_ID',$solicitud_ID)
-        ->max('HIS_NUMERO')->first();
+        ->max('HIS_NUMERO');
 
         return $MAX ? $MAX : 1;
     }

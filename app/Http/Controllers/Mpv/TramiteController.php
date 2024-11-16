@@ -77,8 +77,16 @@ class TramiteController extends Controller
 
     public function listarSolicitud()
     {
-        $USUARIO = session('user')->USU_NUMERO_DOCUMENTO;
-        $SOLICITUDES = DB::select('EXEC MDSJL.MOSTRAR_SOLICITUDES ?', [$USUARIO]);
+        $USUARIO = session('user');
+        $SOLICITUDES = DB::select('EXEC MDSJL.MOSTRAR_SOLICITUDES @NUMERO_DOCUMENTO_PERSONA = ?', [$USUARIO->USU_NUMERO_DOCUMENTO]);
+        // dd($SOLICITUDES);
+        return response()->json($SOLICITUDES);
+
+    }
+    public function listarSolicitudComoTramitador()
+    {
+        $USUARIO = session('user');
+        $SOLICITUDES = DB::select('EXEC MDSJL.MOSTRAR_SOLICITUDES @NUMERO_DOCUMENTO_PERSONA = ?,@TIPO_LISTADO_ROL = ? ', [$USUARIO->USU_NUMERO_DOCUMENTO,$USUARIO->ID_ROLES]);
         // dd($SOLICITUDES);
         return response()->json($SOLICITUDES);
 
@@ -122,6 +130,10 @@ class TramiteController extends Controller
         return response()->json($estados);
     }
 
+    public function correlativoSiguiente()
+    {
+
+    }
     public function registrarSolicitud(Request $request)
     {
         // dd($request);
@@ -135,18 +147,35 @@ class TramiteController extends Controller
 
         $SOLICITUD = new Solicitud();
 
-        $CORRELATIVO_ACTUAL = Solicitud::max('SOLI_ID');
-        $TEMP = $CORRELATIVO_ACTUAL + 1;
-        $CORRELATIVO_NUEVO = str_pad($TEMP, 5, '0', STR_PAD_LEFT);
-        $P_ANIO_EXPEDIENTE = now()->format('Y');
+
+        $CORRELATIVO_ACTUAL = Solicitud::where('COD_USUARIO', session('user')->USU_ID)
+            ->where('SOLI_NU_EMI', 'LIKE', 'SOL-' . now()->format('Y') . '%')
+            ->orderBy('SOLI_NU_EMI', 'desc')
+            ->first();
+
+        if ($CORRELATIVO_ACTUAL) {
+            // Extraer el número del correlativo con una expresión regular
+            preg_match('/SOL-(\d{4})-(\d{5})/', $CORRELATIVO_ACTUAL->SOLI_NU_EMI, $matches);
+
+            if (isset($matches[2])) {
+                // Extraer el número correlativo y aumentarlo
+                $correlativo = (int) $matches[2];  // El número de correlativo (ej. 00006)
+                $correlativoSiguiente = str_pad($correlativo + 1, 5, '0', STR_PAD_LEFT);  // Incrementar y formatear
+            }
+        } else {
+            // Si no existe un correlativo previo, se asigna el primer correlativo del año
+            $correlativoSiguiente = '00001';
+        }
+ 
+        $NU_EMI ='SOL-' . now()->format('Y'). '-' . $correlativoSiguiente;         
 
         if ($P_TUPA != 0) {
             $SOLICITUD->SOLI_COD_TUPA = $P_TUPA;
-            // $SOLICITUD->SOLI_NU_EMI = 'EXP-' . $P_ANIO_EXPEDIENTE . '-' . $CORRELATIVO_NUEVO;
         }
 
-        $SOLICITUD->SOLI_NU_EMI = 'SOL-' . $P_ANIO_EXPEDIENTE . '-' . $CORRELATIVO_NUEVO;
-        $SOLICITUD->SOLI_NU_ANN = $P_ANIO_EXPEDIENTE;
+        $SOLICITUD->SOLI_NU_EMI = $NU_EMI;
+        $SOLICITUD->SOLI_NU_ANN =  now()->format('Y');
+
         // $SOLICITUD->SOLI_FECHA_EMISION = now()->format('Y-m-d H:i:s'); // esto se registra al sgd
         $SOLICITUD->SOLI_FECHA = now()->format('Y-m-d H:i:s');
         // $SOLICITUD->SOLI_NRO_EXPEDIENTE = $P_NRO_EXPEDIENTE;
@@ -166,7 +195,7 @@ class TramiteController extends Controller
 
         try {
             $SOLICITUD->save();
-            $mensaje = $this->guardarArchivos($request, $SOLICITUD->SOLI_ID);
+            $mensaje = $this->guardarArchivos($request,  $NU_EMI,$SOLICITUD->SOLI_ID);
             return redirect('/tramite/solicitud')->with($mensaje['tipo'], $mensaje['mensaje']);
         } catch (\Exception $e) {
             return ['error', $e->getMessage()];
@@ -174,36 +203,40 @@ class TramiteController extends Controller
         }
     }
 
+    // se usa en observados
     public function guardarArchivosPlantilla($archivo, $usuario, $solicitudId, $carpeta)
     {
-
-        $BASE_PATH_MPV = '../../storage/app/public/ArchivosMPV';
+        //1. Ruta base para crear los archivos
+        $BASE_PATH_MPV = 'public/ArchivosMPV';
         $USUARIO = $usuario;
         $ARCHIVO_PRIN_FOLDER = $carpeta; //observado
+        $CORRELATIVO = Solicitud::where('SOLI_NU_EMI', $solicitudId)
+        ->select('SOLI_NU_EMI')->first();
 
-        // 3. Crear estructura de directorios
-        $USUARIO_PATH = "{$BASE_PATH_MPV}/{$USUARIO}/{$solicitudId}";
+        // 2. Crear estructura de directorios
+        $USUARIO_PATH = "{$BASE_PATH_MPV}/{$USUARIO}/{$CORRELATIVO}";
         $ARCHIVO_PRINCIPAL_PATH = "{$USUARIO_PATH}/{$ARCHIVO_PRIN_FOLDER}";
         $ARCHIVO_PRINCIPAL = $archivo;
         $NOMBRE_ARCHIVOS_PRINCIPAL = $this->limpiarNombreArchivo($ARCHIVO_PRINCIPAL->getClientOriginalName());
-        
+
+        //dd($USUARIO_PATH,$ARCHIVO_PRINCIPAL_PATH);
         foreach ([$USUARIO_PATH, $ARCHIVO_PRINCIPAL_PATH] as $PATH) {
             if (!Storage::exists($PATH)) {
                 Storage::makeDirectory($PATH);
             }
         }
-        try { 
+        try {
             $RUTA_ARCHIVO = Storage::putFileAs(
                 $ARCHIVO_PRINCIPAL_PATH,
                 $ARCHIVO_PRINCIPAL,
                 $NOMBRE_ARCHIVOS_PRINCIPAL
             );
-            return $RUTA_ARCHIVO ;
+            return $RUTA_ARCHIVO;
         } catch (\Throwable $th) {
             return 'error';
         }
     }
-    public function guardarArchivos(Request $request, $SOLICITUD_ID)
+    public function guardarArchivos(Request $request,$NU_EMI, $SOLICITUD_ID)
     {
         try {
             $validator = Validator::make($request->all(), [
@@ -217,13 +250,14 @@ class TramiteController extends Controller
 
             //sale  hasta la ruta http::/
             // ../../storage/app/public/ArchivosMPV
-            $BASE_PATH_MPV = '../../storage/app/public/ArchivosMPV';
+            // $BASE_PATH_MPV = '../../storage/app/public/archivosMPV';
+            $BASE_PATH_MPV = 'public/archivosMPV';
             $USUARIO = session('user')->USU_NUMERO_DOCUMENTO;
             $ARCHIVO_PRIN_FOLDER = 'archivo_principal';
             $ANEXOS_FOLDER = 'anexos';
 
             // 3. Crear estructura de directorios
-            $USUARIO_PATH = "{$BASE_PATH_MPV}/{$USUARIO}/{$SOLICITUD_ID}";
+            $USUARIO_PATH = "{$BASE_PATH_MPV}/{$USUARIO}/{$NU_EMI}";
             $ARCHIVO_PRINCIPAL_PATH = "{$USUARIO_PATH}/{$ARCHIVO_PRIN_FOLDER}";
             $ANEXOS_PATH = "{$USUARIO_PATH}/{$ANEXOS_FOLDER}";
 
@@ -273,7 +307,7 @@ class TramiteController extends Controller
             $mensaje = $this->cargarInformacioArchivos($ANEXOS_DATA, $ARCHIVO_PRINCIPAL_DATA, $SOLICITUD_ID);
             return $mensaje;
         } catch (\Exception $e) {
-            return ['tipo' => 'error', 'mensaje' => 'Ocurrio un problema al guardar los archivos en el local, comunicate con el administrador'];
+            return ['tipo' => 'error', 'mensaje' => 'Ocurrio un problema al guardar los archivos en el local, comunicate con el administrador' . $e->getMessage()];
             // return [ 'error','Ocurrio un problema al guardar los archivos en el local, comunicate con el administrador']; 
             //     'error' => $e->getMessage()
         }

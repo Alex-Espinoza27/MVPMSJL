@@ -3,7 +3,8 @@ $(document).ready(function () {
 });
 
 function postSolicitudes() {
-    var url = 'tramite/solicitud/lista';
+
+    var url = 'tramite/solicitud/tramitadorLista';
     fetchGet(url, function (result) {
         data = result;
         mostrarDatosTabla_AdminSolicitud(data, '#dataSolicitud');
@@ -19,12 +20,18 @@ function limpiarFiltro(){
     $('#FILTRO_FECHA_FIN').val('');
 }
 
-
+function reducir(data) {
+    if (data) {
+        return data.length > 50 ? `${data.substring(0, 50)}...` : data
+    }
+    return '';
+}
 function mostrarDatosTabla_AdminSolicitud(data, idtabla) {
 
     $(idtabla).DataTable({
         data: data,
         columns: [
+            { data: 'SOLI_ID' },
             { data: 'SOLI_NU_EMI' },
             { data: 'SOLI_FECHA' },
             { data: 'SOLI_NRO_EXPEDIENTE' },
@@ -34,6 +41,12 @@ function mostrarDatosTabla_AdminSolicitud(data, idtabla) {
             },
             {
                 data: 'SOLI_OBSERVACION',
+                render: function (data) {
+                    if (data) {
+                        return data.length > 50 ? `${data.substring(0, 50)}...` : data
+                    }
+                    return '';
+                }
             },
             { data: 'CANTIDAD_ANEXO' },
             {
@@ -57,7 +70,7 @@ function mostrarDatosTabla_AdminSolicitud(data, idtabla) {
                             </div>
                         </div>
                         `;
-                            // <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-trash"></i></button>
+                        // <button type="button" class="btn btn-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-trash"></i></button>
                 }
             }
         ],
@@ -142,46 +155,49 @@ function mostrarDataSolicitud(data){
     // archivos
     var archivoPrincipal = document.getElementById('ARCHIVOPRINCIPAL')
     archivoPrincipal.innerHTML = ''; 
-    archivoPrincipal.innerHTML += `<li><a href="${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE_ORIGEN}"  target="_blank">${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE}</a></li>`
+    const pathAdicional = '../../storage/app'
+    archivoPrincipal.innerHTML += `<li><a href="${pathAdicional+'/' + data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE_ORIGEN}"  target="_blank">${data['archivoPrincipal'].ARCHIPRIN_NOMBRE_FILE}</a></li>`
 
     //anexo
     var anexos = document.getElementById('ANEXOS');
     if(data['anexos']){
         anexos.innerHTML += '<ul class="m-0">' 
         data['anexos'].forEach(anexo => {
-            anexos.innerHTML += `<li><a href="${anexo.ANEX_NOMBRE_FILE_ORIGEN}" target="_blank" >${anexo.ANEX_NOMBRE_FILE}</a></li>`;
+            anexos.innerHTML += `<li><a href="${pathAdicional +'/'+ anexo.ANEX_NOMBRE_FILE_ORIGEN}" target="_blank" >${anexo.ANEX_NOMBRE_FILE}</a></li>`;
         });
          anexos.innerHTML += '</ul>'
     }
 }
 
 function RegistrarValidacionSolicitud(){
-    const archivoGuia = document.getElementById('P_ARCHIVO_OBSERVACION');
-    const observacion = getValue('P_MENSAJE_OBSERVACION');
-    const fechaLimite = getValue('P_FECHA_LIMITE_SUBSANACION');
-    let min = parseInt($("#P_MENSAJE_OBSERVACION" ).attr("minlength"));
+    // const archivoGuia = $('#P_ARCHIVO_OBSERVACION').prop("files")[0];
+    // const archivoGuia2 = document.getElementById('P_ARCHIVO_OBSERVACION');
+    // const observacion = getValue('P_MENSAJE_OBSERVACION');
+    // const fechaLimite = getValue('P_FECHA_LIMITE_SUBSANACION');
+    // let min = parseInt($("#P_MENSAJE_OBSERVACION" ).attr("minlength"));
+    // if (observacion && observacion.length < min) {
+    //     showMessageSweet('warning','La observacion debe ser valido');
+    //     return false;
+    // }
+    // let url = 'administrarSolicitud/registrarObservacion';
+    // fetchPost(url,data, function(result){
+    //     return showMessageSweetRegister(result['tipo'],result['mensaje'] )
+    // })
+    setValue('TIPO_REGISTRO_OBSERVACION', 1);
 
-    console.log(observacion,observacion.length);
-    
-    if (observacion && observacion.length < min) {
-        showMessageSweet('warning','La observacion debe ser valido');
-        return false;
-    }
-
-    data = {
-        OBSERVACION : observacion,
-        FECHALIMITE : (fechaLimite) ? fechaLimite : null,
-        ARCHIVOGUIA : (archivoGuia) ? archivoGuia.value : null,
-        SOLICITUD_ID : getValue('ID_SOLICITUD')
-    }
-    console.log(data);
-    
-    let url = 'administrarSolicitud/registrarObservacion';
-    fetchPost(url,data, function(result){
-        console.log(result);
-        return showMessageSweetRegister(result['tipo'],result['mensaje'] )
-    })
 }
+// function registrarObservacion(tipo){
+//     setValue('TIPO_REGISTRO_OBSERVACION', tipo);
+// }
+
+// setValue('TIPO_REGISTRO_OBSERVACION', tipo);
+// setValue('TIPO_REGISTRO_OBSERVACION','1')
+function actualizarTipoOperacion(tipo){
+     document.getElementById('TIPO_REGISTRO_OBSERVACION').value = tipo
+    document.getElementById('formObservacion').submit();
+}
+
+
 
 function esFechaMayorQueHoy(fechaInputId) {
     // const fechaInput = document.getElementById(fechaInputId).value;
@@ -198,13 +214,12 @@ function esFechaMayorQueHoy(fechaInputId) {
     }
 }
  
-function registrarObservacion(){
-
-}
 
 function cargarArchivoGuia(event, cant = 2) {
 
     const file = event.target.files[0];
+    // console.log(file);
+    
     if (file) {
         const fileSize = file.size;
         const maxSize = cant * 1024 * 1024; 
@@ -234,3 +249,6 @@ function cargarArchivoGuia(event, cant = 2) {
         } 
     }
 }
+// Illuminate\Database\QueryException: SQLSTATE[HY000] [1045] Access denied for user &#039;forge&#039;@&#039;localhost&#039; (using password: NO) 
+// (Connection: mysql, SQL: EXEC MDSJL.MOSTRAR_SOLICITUDES 76815943) 
+// in file C:\laragon\www\MPVSJL\vendor\laravel\framework\src\Illuminate\Database\Connection.php on line 829
