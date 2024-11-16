@@ -1,0 +1,427 @@
+--===========================================================================
+---================== CREACION DE TABLAS===============================
+--===========================================================================
+ 
+DBCC CHECKIDENT ('MDSJL.ROL', RESEED, 1);
+
+SELECT * FROM MDSJL.ESTADO
+SELECT * FROM MDSJL.TIPO_DOCUMENTO
+SELECT * FROM MDSJL.USUARIO
+SELECT * FROM MDSJL.SOLICITUD
+SELECT * FROM MDSJL.HISTORIAL_SOLICITUD
+SELECT * FROM MDSJL.ARCHIVO_PRINCIPAL 
+SELECT * FROM MDSJL.ANEXO
+SELECT * FROM MDSJL.ROL r 
+SELECT * FROM MDSJL.PERMISOS p 
+SELECT * FROM MDSJL.OPCIONES o 
+
+
+DROP TABLE MDSJL.ESTADO
+DROP TABLE MDSJL.TIPO_DOCUMENTO
+
+DROP TABLE MDSJL.USUARIO
+DROP TABLE MDSJL.SOLICITUD 
+DROP TABLE MDSJL.HISTORIAL_SOLICITUD
+DROP TABLE MDSJL.ARCHIVO_PRINCIPAL 
+DROP TABLE MDSJL.ANEXO
+
+
+
+
+-- TipoDocumento
+
+CREATE TABLE MDSJL.TIPO_DOCUMENTO (
+	TIPDOC_ID varchar(3)  NOT NULL,
+	TIPDOC_DESCRIPCION nvarchar(191)  NOT NULL,
+	TIPDOC_CREATED_AT datetime2(0) NULL,
+	TIPDOC_UPDATED_AT datetime2(0) NULL,
+	TIPDOC_DELETED_AT datetime2(0) NULL,
+	CONSTRAINT TIPO_DOCUMENTO_PKEY PRIMARY KEY (TIPDOC_ID)
+);
+
+
+
+--- ESTADO 
+CREATE TABLE MDSJL.ESTADO (
+	ESTA_ID int IDENTITY(1,1) NOT NULL,
+	ESTA_CO_ESTADO char(2)   NOT NULL,
+	ESTA_TABLA nvarchar(50)   NOT NULL,
+	ESTA_DESCRIPCION nvarchar(100)   NOT NULL,
+	ESTA_DESCRIPCION_MP nvarchar(100)   NOT NULL,
+	ESTA_CREATED_AT datetime2(0) NULL,
+	ESTA_UPDATED_AT datetime2(0) NULL,
+	ESTA_DELETED_AT datetime2(0) NULL,
+	ESTA_COLOR nvarchar(100)   NULL,
+	ESTA_ORDEN char(1)   NULL,
+	CONSTRAINT ESTADO_PKEY PRIMARY KEY (ESTA_ID)
+);
+
+
+---- USUARIO
+CREATE TABLE MDSJL.USUARIO (
+	USU_ID bigint IDENTITY(1,1) NOT NULL,
+	USU_TIPO_PERSONA nvarchar(2)  NULL,
+	USU_TIPO_DOCUMENTO nvarchar(2)   NULL,
+	USU_NUMERO_DOCUMENTO nvarchar(20)   NULL,
+	
+	USU_APE_PATERNO nvarchar(200)   NULL,
+	USU_APE_MATERNO nvarchar(200)   NULL,
+	USU_NOMBRES nvarchar(200)   NULL,
+	USU_RAZON_SOCIAL nvarchar(200)   NULL,
+	
+	USU_DIRECCION nvarchar(200)  NULL,
+	USU_DEPARTAMENTO varchar(2)   NULL,
+	USU_PROVINCIA varchar(2)   NULL,
+	USU_DISTRITO varchar(2)   NULL,
+	USU_IND_ESTADO char(1)   NULL,
+	
+	USU_CLAVE nvarchar(255)   NOT NULL,
+	
+	USU_NU_CELULAR char(9)   NULL,
+	USU_CORREO nvarchar(200)   NULL,
+	
+	USU_FEC_REGISTRO datetime2(0) NULL,
+	USU_FEC_MODIFICACION datetime2(0) NULL,
+	USU_FEC_NACE date NULL,
+	USU_SEXO varchar(2)   NULL,
+	IMAGEN nvarchar(MAX)   NULL,
+	ID_ROLES smallint NULL,
+	ID_REPRESENTANTE bigint NULL,
+	CONSTRAINT PK_USUARIO PRIMARY KEY (USU_ID)
+);
+
+
+--- SOLICITUD
+
+CREATE TABLE MDSJL.SOLICITUD (
+	SOLI_ID bigint IDENTITY(1,1) NOT NULL,
+	SOLI_NU_EMI nvarchar(191)   NULL,
+	SOLI_NU_ANN nvarchar(10)   NULL,
+	SOLI_FECHA_EMISION datetime2(0) NULL,
+	SOLI_FECHA datetime2(0) NULL,
+	
+	SOLI_NRO_EXPEDIENTE nvarchar(50)   NULL,
+	
+	TIPO_DOCUMENTO_ID varchar(3)   NULL, -- EXTRANJERO, DNI, 
+	
+	SOLI_NUMERO_DOCUMENTO nvarchar(50)   NULL,
+	SOLI_ASUNTO nvarchar(1000)   NOT NULL,
+	SOLI_FOLIOS int NULL,
+	SOLI_COD_TUPA nvarchar(255)   NULL,
+	
+	CREATED_AT datetime2(0) DEFAULT getdate() NULL,
+	UPDATED_AT datetime2(0) NULL,
+	DELETED_AT datetime2(0) NULL,
+	CREATED_BY nvarchar(20)   NULL,
+	UPDATED_BY nvarchar(20)   NULL,
+	
+	COD_USUARIO nvarchar(30)   NOT NULL,
+	
+	SOLI_FECHA_OBSERVACION datetime2(0) NULL,
+	SOLI_OBSERVACION nvarchar   NULL,
+	SOLI_FECHA_LIMITE_SUBSANACION datetime2(0) NULL,
+	SOLI_FECHA_SUBSANACION datetime2(0) NULL,
+	SOLI_OBSERVADO_BY nvarchar(50)   NULL,
+	SOLI_FILE_OBSERVACION nvarchar(150)   NULL,
+	SOLI_ESTADO_ID int NOT NULL,
+	CREATED_IP nvarchar(50)   NULL,
+	UPDATED_IP nvarchar(50)   NULL,
+	CONSTRAINT PK_SOLICITUD PRIMARY KEY (SOLI_ID)
+);
+
+
+-- HISOTORIAL
+
+CREATE TABLE MDSJL.HISTORIAL_SOLICITUD (
+	HIS_ID bigint IDENTITY(1,1) NOT NULL,
+	HIS_NUMERO nvarchar(191)   NULL,
+	HIS_NU_ANN nvarchar(10)   NULL,
+	SOLICITUD_ID bigint NOT NULL,
+	CREATED_AT datetime2(0) NULL,
+	CREATED_BY int NULL,
+	COD_USUARIO nvarchar(30)   NOT NULL,
+	HIS_ESTADO int NOT NULL,
+	HIS_FECHA_OBSERVACION datetime2(0) NULL,
+	HIS_OBSERVACION nvarchar   NULL,
+	HIS_COD_TUPA nvarchar(255)   NULL,
+	SOLI_OBSERVADO_BY nvarchar(50)   NULL,
+	HIS_ASUNTO nvarchar(1000)   NOT NULL,
+	CONSTRAINT PK_HISTORIAL_SOLICITUD PRIMARY KEY (HIS_ID)
+);
+
+-- ARCHCVO PRINCIPAL
+
+CREATE TABLE MDSJL.ARCHIVO_PRINCIPAL (
+	ARCHIPRIN_ID bigint IDENTITY(1,1) NOT NULL,
+	SOLICITUD_ID bigint NOT NULL,
+	ARCHIPRIN_NOMBRE_FILE_ORIGEN nvarchar(191)   NOT NULL,
+	ARCHIPRIN_FILE varbinary(MAX) NULL,
+	CREATED_AT datetime2(0) NULL,
+	UPDATED_AT datetime2(0) NULL,
+	DELETED_AT datetime2(0) NULL,
+	ARCHIPRIN_NOMBRE_FILE varchar(150)   NULL,
+	ARCHIPRIN_IS_UPLOAD char(1)   NULL,
+	CONSTRAINT PK_ARCHIVO_PRINCIPAL PRIMARY KEY (ARCHIPRIN_ID)
+);
+
+---- ANEXOS
+
+CREATE TABLE MDSJL.ANEXO (
+	ANEX_ID bigint IDENTITY(1,1) NOT NULL,
+	ANEX_NUMERO int NULL,
+	SOLICITUD_ID bigint NOT NULL,
+	ANEX_NOMBRE_FILE_ORIGEN nvarchar(191)   NOT NULL,
+	ANEX_DETALLE nvarchar(191)   NULL,
+	ANEX_IS_UPLOAD nvarchar(191)   NULL,
+	ANEX_FILE varbinary(MAX) NULL,
+	ANEX_IND_HABILITADO char(1)   NULL,
+	ANEX_OBSERVACION nvarchar(191)   NULL,
+	CREATED_AT datetime2(0) NULL,
+	UPDATED_AT datetime2(0) NULL,
+	DELETED_AT datetime2(0) NULL,
+	ANEX_NOMBRE_FILE nvarchar(150)   NULL,
+	CONSTRAINT PK_ANEXO PRIMARY KEY (ANEX_ID)
+);
+
+-- 
+
+
+
+-- ==============================================================================
+----- ROL
+
+CREATE TABLE MDSJL.ROL (
+	ROL_CODIGO int IDENTITY(1,1) NOT NULL,
+	ROL_NOMBRE varchar(150)   NOT NULL,
+	ROL_NC_NOMBRE varchar(150)   NOT NULL,
+	ROL_ESTADO int NULL,
+	CONSTRAINT PK__ROL__6A87FB9B599386ED PRIMARY KEY (ROL_CODIGO)
+);
+
+-- OPCIONES
+
+
+CREATE TABLE MDSJL.OPCIONES (
+	OPCI_CODIGO int IDENTITY(1,1) NOT NULL,
+	OPCI_TIPO int NULL,
+	OPCI_SUB_CODIGO int NULL,
+	OPCI_ICON varchar(100)   NULL,
+	OPCI_HREF varchar(100)   NULL,
+	OPCI_NOMBRE varchar(100)   NULL,
+	OPCI_SUB_NOMBRE varchar(100)   NULL,
+	OPCI_ICON_NOTIFICA varchar(100)   NULL,
+	OPCI_ORDER int NULL,
+	OPCI_ESTADO int NULL,
+	CONSTRAINT PK__OPCIONES__1BDFC2BF6C8A7E59 PRIMARY KEY (OPCI_CODIGO)
+);
+
+--- PERMISOS
+
+CREATE TABLE MDSJL.PERMISOS (
+	PERM_CODIGO int IDENTITY(1,1) NOT NULL,
+	ROL_CODIGO int NOT NULL,
+	OPCI_CODIGO int NOT NULL,
+	PERM_ESTADO int NOT NULL
+);
+
+
+
+-- ===================================================================================================
+-- =============================   PROCEDURE ROLES  ================
+-- ===================================================================================================
+CREATE PROCEDURE [MDSJL].[SP_OPCIONES]
+	@ACCION INT = 0,
+	@ROL_CODIGO INT = 0
+AS
+IF(@ACCION = 1) GOTO SELECT_OPCION_NABVAR
+RETURN
+SELECT_OPCION_NABVAR:
+BEGIN
+	SET NOCOUNT ON;
+	SELECT C.OPCI_CODIGO,
+	C.OPCI_SUB_CODIGO,
+	C.OPCI_TIPO,
+    C.OPCI_ICON, 
+    C.OPCI_HREF, 
+    C.OPCI_NOMBRE,
+    C.OPCI_SUB_NOMBRE,
+    C.OPCI_ICON_NOTIFICA, 
+    C.OPCI_ORDER,
+    A.ROL_CODIGO,
+    A.ROL_NOMBRE,
+    A.ROL_NC_NOMBRE
+    FROM [MDSJL].ROL A
+    INNER JOIN [MDSJL].PERMISOS B ON A.ROL_CODIGO = B.ROL_CODIGO
+    INNER JOIN [MDSJL].OPCIONES C ON B.OPCI_CODIGO = C.OPCI_CODIGO
+    WHERE 
+		C.OPCI_ESTADO=1 
+	AND B.PERM_ESTADO=1 
+	AND A.ROL_CODIGO=@ROL_CODIGO
+	ORDER BY C.OPCI_ORDER ASC
+RETURN
+END
+
+-- ===================================================================================================
+-- =============================   PROCEDURE SOLICITUD  ================
+-- ===================================================================================================
+
+CREATE PROCEDURE [MDSJL].[MOSTRAR_SOLICITUDES]
+    @NUMERO_DOCUMENTO_PERSONA NVARCHAR(20) --  = ''
+AS
+BEGIN 
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        SELECT
+        	SOLI.SOLI_ID,
+            SOLI.SOLI_NU_EMI,
+            SOLI.SOLI_FECHA,
+            SOLI.SOLI_ASUNTO, 
+            --ISNULL(SOLI.SOLI_OBSERVACION, '') AS SOLI_OBSERVACION,
+            SOLI.SOLI_OBSERVACION,
+            ISNULL(SOLI.SOLI_FECHA_OBSERVACION ,'') AS SOLI_FECHA_OBSERVACION,
+            ISNULL(SOLI.SOLI_NRO_EXPEDIENTE,'')  AS  SOLI_NRO_EXPEDIENTE,
+            ISNULL(SOLI.SOLI_FECHA_EMISION,'')  AS SOLI_FECHA_EMISION,
+            ESTADO.ESTA_ID,
+            ESTADO.ESTA_DESCRIPCION,
+            ESTADO.ESTA_COLOR,
+            (SELECT COUNT(*) 
+             FROM MDSJL.ANEXO a 
+             WHERE a.SOLICITUD_ID = SOLI.SOLI_ID
+             AND a.ANEX_IND_HABILITADO = '1') AS CANTIDAD_ANEXO
+        FROM MDSJL.SOLICITUD SOLI 
+			INNER JOIN MDSJL.ESTADO ESTADO ON SOLI.SOLI_ESTADO_ID = ESTADO.ESTA_ID 
+        WHERE 
+            SOLI.CREATED_BY = @NUMERO_DOCUMENTO_PERSONA
+            AND SOLI.SOLI_ESTADO_ID NOT IN (6)
+        	ORDER BY SOLI.SOLI_FECHA ASC
+           
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        -- Si ocurre un error, revertir la transacción
+        ROLLBACK TRANSACTION;
+
+        -- Mostrar el mensaje de error
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        DECLARE @ErrorSeverity INT;
+        DECLARE @ErrorState INT;
+
+        SELECT 
+            @ErrorMessage = ERROR_MESSAGE(),
+            @ErrorSeverity = ERROR_SEVERITY(),
+            @ErrorState = ERROR_STATE();
+           
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    END CATCH
+END;
+
+-- ===================================================================================================
+-- =============================  FILTRO       =======================================================
+-- ===================================================================================================
+
+
+
+CREATE PROCEDURE [MDSJL].[FILTRAR_SOLICITUD]
+	@NUMERO_DOCUMENTO_PERSONA NVARCHAR(20),
+    @P_NU_EMI NVARCHAR(191) = NULL,
+    @P_TIPO_EXPEDIENTE VARCHAR(3) = NULL ,
+    @P_ESTADO INT = NULL,
+    @P_DESDE DATE = NULL,
+    @P_HASTA DATE = NULL
+AS
+BEGIN 
+    BEGIN TRY
+        BEGIN TRANSACTION;
+        SELECT
+        	SOLI.SOLI_ID,
+            SOLI.SOLI_NU_EMI,
+            SOLI.SOLI_FECHA,
+            SOLI.SOLI_ASUNTO, 
+            --ISNULL(SOLI.SOLI_OBSERVACION, '') AS SOLI_OBSERVACION,
+            SOLI.SOLI_OBSERVACION,
+            ISNULL(SOLI.SOLI_FECHA_OBSERVACION ,'') AS SOLI_FECHA_OBSERVACION,
+            ISNULL(SOLI.SOLI_NRO_EXPEDIENTE,'')  AS  SOLI_NRO_EXPEDIENTE,
+            ISNULL(SOLI.SOLI_FECHA_EMISION,'')  AS SOLI_FECHA_EMISION,
+            ESTADO.ESTA_ID,
+            ESTADO.ESTA_DESCRIPCION,
+            ESTADO.ESTA_COLOR,
+            (SELECT COUNT(*) 
+             FROM MDSJL.ANEXO a 
+             WHERE a.SOLICITUD_ID = SOLI.SOLI_ID
+             AND a.ANEX_IND_HABILITADO = '1') AS CANTIDAD_ANEXO
+        FROM MDSJL.SOLICITUD SOLI 
+			INNER JOIN MDSJL.ESTADO ESTADO ON SOLI.SOLI_ESTADO_ID = ESTADO.ESTA_ID 
+        WHERE 
+		    SOLI.CREATED_BY = @NUMERO_DOCUMENTO_PERSONA
+		    AND SOLI.SOLI_ESTADO_ID NOT IN (6)
+		    AND ( @P_NU_EMI IS NULL OR SOLI.SOLI_NU_EMI LIKE '%' + @P_NU_EMI + '%'
+		    	OR SOLI.SOLI_NRO_EXPEDIENTE LIKE '%' + @P_NU_EMI + '%'
+		    	)
+		    
+		    AND (@P_TIPO_EXPEDIENTE IS NULL OR SOLI.TIPO_DOCUMENTO_ID IN (@P_TIPO_EXPEDIENTE))
+		    AND (@P_ESTADO IS NULL OR SOLI.SOLI_ESTADO_ID = @P_ESTADO)
+		    AND (
+		    	(@P_DESDE IS NULL OR CAST(SOLI.SOLI_FECHA AS DATE) >= @P_DESDE)
+		    	AND (@P_HASTA IS NULL OR CAST(SOLI.SOLI_FECHA AS DATE) <= @P_HASTA)
+		    	)
+            ORDER BY SOLI.SOLI_FECHA ASC
+        COMMIT TRANSACTION;
+    END TRY
+   BEGIN CATCH
+        -- Si ocurre un error, revertir la transacción
+        ROLLBACK TRANSACTION;
+
+        -- Captura y muestra un mensaje de error
+        DECLARE @ErrorMessage NVARCHAR(4000);
+        SET @ErrorMessage = 'Ocurrió un problema en la consulta: ' + ERROR_MESSAGE();
+        RAISERROR (@ErrorMessage, 16, 1);
+    END CATCH
+END;
+
+-- ===================================================================================================
+-- =============================  DATA MAESTRA  =======================================================
+-- ===================================================================================================
+-- encriptar clave: CONVERT(NVARCHAR(255), HASHBYTES('SHA2_256', 'passwordabc'), 2)
+
+INSERT INTO [MDSJL].[PERMISOS] (ROL_CODIGO,OPCI_CODIGO,PERM_ESTADO) VALUES
+	 (1,1,1),
+	 (1,2,1),
+	 (1,3,1),
+	 (1,4,1),
+	 (2,1,1),
+	 (2,2,1);
+
+INSERT INTO [MDSJL].[ROL] (ROL_NOMBRE,ROL_NC_NOMBRE,ROL_ESTADO) VALUES
+	 (N'Administrador',N'Admin',1),
+	 (N'Ciudadano',N'Ciudadano',1);
+
+SELECT * FROM MDSJL.TIPO_DOCUMENTO 
+INSERT INTO MDSJL.TIPO_DOCUMENTO (TIPDOC_ID, TIPDOC_DESCRIPCION) VALUES 
+	('04', 'CARTA'),
+	('05', 'PROVEIDO'),
+	('06', 'INFORME MULTIPLE'),
+	('07', 'MEMORANDO CIRCULAR'),
+	('08', 'INFORME CIRCULAR')
+
+
+SELECT * FROM [MDSJL].[OPCIONES]
+INSERT INTO [MDSJL].[OPCIONES] (OPCI_TIPO,OPCI_SUB_CODIGO,OPCI_ICON,OPCI_HREF,OPCI_NOMBRE,OPCI_SUB_NOMBRE,OPCI_ICON_NOTIFICA,OPCI_ORDER,OPCI_ESTADO) VALUES
+	 (1,NULL,NULL,NULL,N'Mesa de Partes Virtual',NULL,NULL,1,1),
+	 (2,1,N'<i data-feather="grid" class="align-self-center menu-icon"></i>',N'dashboard/',N'Dashboard',NULL,NULL,1,1),
+	 (2,1,N'<i data-feather="grid" class="align-self-center menu-icon"></i>',N'tramite/solicitud/',N'Mis trámites',NULL,NULL,2,1),
+	 (2,1,N'<i data-feather="grid" class="align-self-center menu-icon"></i>',N'observados/',N'Observados',NULL,NULL,3,1);
+
+
+SELECT * FROM [MDSJL].[OPCIONES]
+INSERT INTO [MDSJL].[USUARIO] (USU_TIPO_PERSONA,USU_TIPO_DOCUMENTO,USU_NUMERO_DOCUMENTO,USU_APE_PATERNO,USU_APE_MATERNO,USU_NOMBRES,USU_RAZON_SOCIAL,USU_NUMERO_RUC,USU_DIRECCION,USU_DEPARTAMENTO,USU_PROVINCIA,USU_DISTRITO,USU_IND_ESTADO,USU_CLAVE,USU_NU_CELULAR,USU_CORREO,USU_FEC_REGISTRO,USU_FEC_MODIFICACION,USU_FEC_NACE,USU_SEXO,IMAGEN,ID_ROLES,ID_REPRESENTANTE) VALUES
+	 (N'1',N'1',N'76815943',N'Espinoza',N'Valera',N'Clinton Alex',N'Espinoza Valera Clinton Alex',NULL,N'asdasd',N'12',N'02',N'03',N'1',N'$2y$10$Smy1COaWbXEe/rcuZZYoSe/JmfA4DoKe17wDYzJfKbXsMzy4UB8sa',N'916533919',N'alex@gmail.com','2024-11-01 17:04:34.000','2024-11-01 17:04:34.000',NULL,NULL,NULL,1,NULL);
+
+
+SELECT * FROM MDSJL.ESTADO 
+INSERT INTO MDSJL.ESTADO (ESTA_CO_ESTADO,ESTA_TABLA,ESTA_DESCRIPCION,ESTA_DESCRIPCION_MP,ESTA_CREATED_AT,ESTA_UPDATED_AT,ESTA_DELETED_AT,ESTA_COLOR,ESTA_ORDEN) VALUES
+	 (N'01',N'SOLICITUD',N'PRESENTADO',N'PRESENTADO','2024-11-07 09:50:00.000','2024-11-07 09:50:00.000',NULL,N'badge badge-outline-info',N'1'),
+	 (N'02',N'SOLICITUD',N'REGISTRADO',N'REGISTRADO','2024-11-07 09:50:00.000','2024-11-07 09:50:00.000',NULL,N'badge badge-outline-success',N'2'),
+	 (N'03',N'SOLICITUD',N'OBSERVADO',N'OBSERVADO','2024-11-07 09:50:00.000','2024-11-07 09:50:00.000',NULL,N'badge badge-outline-warning',N'3'),
+	 (N'04',N'SOLICITUD',N'NO SUBSANADO',N'NO SUBSANADO','2024-11-07 09:50:00.000','2024-11-07 09:50:00.000',NULL,N'badge badge-outline-danger',N'4'),
+	 (N'05',N'SOLICITUD',N'SUBSANADO',N'SUBASANADO','2024-11-07 09:50:00.000','2024-11-07 09:50:00.000',NULL,N'badge badge-outline-purple',N'5'),
+	 (N'06',N'SOLICITUD',N'ANULADO',N'ANULADO','2024-11-07 09:50:00.000','2024-11-07 09:50:00.000',NULL,N'badge badge-outline-dark',N'6');
